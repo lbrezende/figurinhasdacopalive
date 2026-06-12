@@ -1,0 +1,3121 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="O melhor aplicativo de gerenciamento e troca de figurinhas. Controle seu álbum, marque suas repetidas e encontre matches de troca na sua cidade!">
+  <title>Figura Certa — Seu App de Troca de Figurinhas</title>
+  
+  <!-- Google Fonts for premium design -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg: #070a13;
+      --bg-radial: radial-gradient(circle at 50% 0%, #17223b 0%, #070a13 75%);
+      --card: rgba(21, 29, 53, 0.55);
+      --card-solid: #151d33;
+      --card-hover: rgba(29, 40, 72, 0.7);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-focus: #ffd23f;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      
+      /* Glowing Theme Colors */
+      --primary: #ffd23f;
+      --primary-gradient: linear-gradient(135deg, #ffd23f 0%, #ff8a00 100%);
+      --primary-glow: rgba(255, 210, 63, 0.35);
+      
+      --success: #10b981;
+      --success-gradient: linear-gradient(135deg, #34d399 0%, #059669 100%);
+      --success-glow: rgba(16, 185, 129, 0.3);
+      
+      --repeated: #a78bfa;
+      --repeated-gradient: linear-gradient(135deg, #c084fc 0%, #7c3aed 100%);
+      --repeated-glow: rgba(167, 139, 250, 0.35);
+      
+      --danger: #ef4444;
+      --danger-gradient: linear-gradient(135deg, #f87171 0%, #dc2626 100%);
+      
+      --cyan: #06b6d4;
+      --cyan-gradient: linear-gradient(135deg, #22d3ee 0%, #0891b2 100%);
+      --cyan-glow: rgba(6, 182, 212, 0.3);
+      
+      --radius: 20px;
+      --shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+      --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+    
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      outline: none;
+    }
+    
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      background-image: var(--bg-radial);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      scroll-behavior: smooth;
+    }
+    
+    /* Beautiful Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    
+    /* Glowing Background Blobs */
+    .glow-bg {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(100px);
+      z-index: -1;
+      opacity: 0.08;
+      pointer-events: none;
+    }
+    .glow-1 {
+      width: 350px;
+      height: 350px;
+      background: var(--primary);
+      top: -100px;
+      left: -50px;
+    }
+    .glow-2 {
+      width: 450px;
+      height: 450px;
+      background: var(--repeated);
+      bottom: -150px;
+      right: -100px;
+    }
+    
+    /* App container */
+    .app {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 0 0 110px;
+      position: relative;
+      min-height: 100vh;
+    }
+    
+    /* Header */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: rgba(7, 10, 19, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 20px;
+      transition: all 0.3s;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: var(--primary-gradient);
+      display: grid;
+      place-items: center;
+      font-size: 24px;
+      box-shadow: 0 6px 20px var(--primary-glow);
+      animation: floatLogo 3s ease-in-out infinite;
+    }
+    @keyframes floatLogo {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+    .brand h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 800;
+      margin: 0;
+      letter-spacing: -0.5px;
+      background: linear-gradient(90deg, #ffffff, #e5e7eb);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .brand .sub {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 2px;
+      font-weight: 500;
+    }
+    .who {
+      margin-left: auto;
+      text-align: right;
+      font-size: 0.75rem;
+      color: var(--muted);
+      line-height: 1.3;
+    }
+    .who b {
+      color: var(--text);
+      display: block;
+      font-size: 0.9rem;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+    }
+    .who span {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 2px 6px;
+      border-radius: 999px;
+      margin-top: 3px;
+      border: 1px solid var(--border);
+    }
+    
+    /* Layout Elements */
+    .wrap {
+      padding: 18px 16px 0;
+    }
+    
+    /* Card Glassmorphic Design */
+    .card {
+      background: var(--card);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--glass-shadow);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, transparent 100%);
+      pointer-events: none;
+    }
+    .card + .card {
+      margin-top: 16px;
+    }
+    .card:hover {
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+    
+    h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin: 0 0 14px;
+      letter-spacing: -0.2px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    h2 .em {
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    label {
+      display: block;
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin: 0 0 6px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+    
+    /* Premium Form Inputs */
+    input, select {
+      width: 100%;
+      padding: 13px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(10, 15, 30, 0.6);
+      color: var(--text);
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+    input:focus, select:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(255, 210, 63, 0.15);
+      background: rgba(10, 15, 30, 0.85);
+    }
+    
+    .row {
+      display: flex;
+      gap: 12px;
+    }
+    .row > * {
+      flex: 1;
+    }
+
+    /* Inline field error message */
+    .field-error {
+      color: var(--danger);
+      font-size: 0.82rem;
+      line-height: 1.35;
+      margin-top: 6px;
+      display: none;
+    }
+    .field-error.show { display: block; }
+    .field-error .email-fix {
+      color: var(--primary);
+      font-weight: 700;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      cursor: pointer;
+    }
+    .field-error .email-fix:hover { opacity: 0.85; }
+    input.invalid { border-color: var(--danger); }
+    input.invalid:focus { box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.15); }
+
+    /* Phone field (country flag + number) */
+    .phone-group {
+      display: flex;
+      gap: 8px;
+    }
+    .phone-group .phone-country {
+      width: auto;
+      flex: 0 0 120px;
+      padding-left: 12px;
+      padding-right: 8px;
+    }
+    .phone-group .phone-number {
+      flex: 1;
+    }
+    
+    /* Buttons with gradients */
+    .btn {
+      appearance: none;
+      border: 0;
+      cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      padding: 14px 20px;
+      border-radius: 12px;
+      color: #0d0903;
+      background: var(--primary-gradient);
+      width: 100%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 15px var(--primary-glow);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px var(--primary-glow);
+      filter: brightness(1.05);
+    }
+    .btn:active {
+      transform: translateY(0);
+    }
+    .btn.sec {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      border: 1px solid var(--border);
+      box-shadow: none;
+    }
+    .btn.sec:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.2);
+      box-shadow: none;
+    }
+    .btn.ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      box-shadow: none;
+    }
+    .btn.ghost:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .btn.sm {
+      padding: 10px 14px;
+      font-size: 0.82rem;
+      width: auto;
+      border-radius: 10px;
+    }
+    .btn.accent {
+      background: var(--cyan-gradient);
+      color: #04121a;
+      box-shadow: 0 4px 15px var(--cyan-glow);
+    }
+    .btn.accent:hover {
+      box-shadow: 0 6px 20px var(--cyan-glow);
+    }
+    
+    .muted {
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.5;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+    
+    /* Onboarding styles */
+    #onboarding {
+      padding: 30px 20px 50px;
+    }
+    .hero {
+      text-align: center;
+      margin: 20px 0 30px;
+    }
+    .hero .big {
+      font-size: 64px;
+      line-height: 1;
+      margin-bottom: 15px;
+      filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
+      animation: floatLogo 4s ease-in-out infinite;
+    }
+    .hero h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.1rem;
+      font-weight: 800;
+      margin: 10px 0;
+      letter-spacing: -0.8px;
+    }
+    .hero p {
+      color: var(--muted);
+      margin: 0 auto;
+      max-width: 420px;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    .features-list {
+      margin: 20px 0;
+    }
+    .feat {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      padding: 16px 0;
+      border-top: 1px solid var(--border);
+    }
+    .feat:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+    .feat .ic {
+      font-size: 26px;
+      flex: 0 0 auto;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.04);
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--border);
+    }
+    .feat b {
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.98rem;
+      color: var(--text);
+      display: block;
+      margin-bottom: 3px;
+    }
+    .feat p {
+      margin: 0;
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    
+    /* Stats & Modern Progress Ring */
+    .progress-container-card {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      position: relative;
+    }
+    .stats-layout {
+      flex: 1;
+    }
+    .progress-ring-container {
+      position: relative;
+      width: 90px;
+      height: 90px;
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+    }
+    .progress-ring-circle {
+      transition: stroke-dashoffset 0.4s ease-out;
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
+    }
+    .progress-ring-text {
+      position: absolute;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 850;
+      color: var(--success);
+      text-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
+    }
+    .stats-grid-small {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .stat-card-small {
+      background: rgba(10, 15, 30, 0.4);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 6px;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .stat-card-small:hover {
+      background: rgba(10, 15, 30, 0.6);
+      transform: translateY(-2px);
+    }
+    .stat-card-small .num {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+    .stat-card-small .lbl {
+      font-size: 0.62rem;
+      color: var(--muted);
+      margin-top: 3px;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .stat-card-small.have-col .num { color: var(--success); }
+    .stat-card-small.miss-col .num { color: var(--danger); }
+    .stat-card-small.rep-col .num { color: var(--repeated); }
+    .complete-message-p {
+      margin: 12px 0 0;
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-align: center;
+    }
+    
+    /* Card Pack Simulator */
+    .pack-banner-card {
+      background: linear-gradient(135deg, rgba(21, 29, 53, 0.7) 0%, rgba(33, 24, 53, 0.7) 100%);
+      border-color: rgba(167, 139, 250, 0.2);
+      box-shadow: 0 8px 30px rgba(139, 92, 246, 0.15);
+      margin-top: 14px;
+    }
+    .pack-banner-layout {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .pack-banner-icon {
+      font-size: 42px;
+      animation: packFloat 3s ease-in-out infinite;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+    }
+    @keyframes packFloat {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-6px) rotate(3deg); }
+    }
+    .pack-banner-details {
+      flex: 1;
+    }
+    .pack-banner-details h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1rem;
+      margin: 0 0 4px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .pack-banner-details p {
+      margin: 0 0 10px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+    .pack-action-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .skip-cooldown-link {
+      font-size: 0.72rem;
+      color: var(--repeated);
+      text-decoration: underline;
+      cursor: pointer;
+      font-weight: 600;
+      opacity: 0.8;
+    }
+    .skip-cooldown-link:hover {
+      opacity: 1;
+    }
+    
+    /* Toolbar and Album Grid */
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin: 16px 0 12px;
+    }
+    .toolbar-search-wrap {
+      position: relative;
+      flex: 1;
+    }
+    .toolbar-search-wrap span {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+    .toolbar-search-wrap input {
+      padding-left: 38px;
+    }
+    
+    /* Slideable Filter Chips */
+    .filter-scroll-container {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 4px 0 8px;
+      margin: 0 -4px;
+      scrollbar-width: none; /* Firefox */
+    }
+    .filter-scroll-container::-webkit-scrollbar {
+      display: none; /* Chrome/Safari */
+    }
+    .filter-chip {
+      white-space: nowrap;
+      padding: 8px 16px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.03);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--muted);
+    }
+    .filter-chip.active {
+      background: var(--primary-gradient);
+      color: #0d0903;
+      border-color: transparent;
+      box-shadow: 0 4px 10px var(--primary-glow);
+    }
+    
+    .legend {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 12px;
+      font-size: 0.74rem;
+      color: var(--muted);
+      justify-content: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+    }
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+      border: 1px solid var(--border);
+    }
+    .dot.miss { background: rgba(30, 41, 59, 0.4); }
+    .dot.have { background: var(--success); border-color: transparent; }
+    .dot.rep { background: var(--repeated); border-color: transparent; }
+    
+    /* Album Grid & Cells */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .cell {
+      aspect-ratio: 1;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(30, 41, 59, 0.35);
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 0.85rem;
+      font-family: 'Outfit', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      user-select: none;
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .cell:hover {
+      transform: translateY(-2px) scale(1.03);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .cell:active {
+      transform: scale(0.95);
+    }
+    .cell.have {
+      background: var(--success-gradient);
+      color: #ffffff;
+      border-color: transparent;
+      box-shadow: 0 4px 10px var(--success-glow);
+    }
+    .cell.rep {
+      background: var(--repeated-gradient);
+      color: #ffffff;
+      border-color: transparent;
+      box-shadow: 0 4px 12px var(--repeated-glow);
+    }
+    .cell .badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: var(--primary-gradient);
+      color: #0d0903;
+      font-size: 0.62rem;
+      min-width: 17px;
+      height: 17px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      padding: 0 3px;
+      font-weight: 800;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+    
+    /* Matches (Trading Neighbors) UI */
+    .empty {
+      text-align: center;
+      padding: 40px 10px;
+      color: var(--muted);
+    }
+    .empty .big {
+      font-size: 48px;
+      margin-bottom: 12px;
+      animation: floatLogo 3s ease-in-out infinite;
+    }
+    
+    .match {
+      background: var(--card);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px;
+      margin-top: 14px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+    .match:hover {
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+    .match.top {
+      border-color: rgba(255, 210, 63, 0.4);
+      box-shadow: 0 8px 30px rgba(255, 210, 63, 0.08);
+    }
+    .match.top::before {
+      content: "★ MELHOR MATCH";
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: var(--primary-gradient);
+      color: #0d0903;
+      font-size: 0.6rem;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 0 0 0 10px;
+      letter-spacing: 0.5px;
+    }
+    .mhead {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .ava {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 1.15rem;
+      color: #ffffff;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .mhead .nm {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 1.05rem;
+    }
+    .mhead .meta {
+      font-size: 0.74rem;
+      color: var(--muted);
+      margin-top: 1px;
+    }
+    .score {
+      margin-left: auto;
+      text-align: center;
+    }
+    .score .n {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 850;
+      color: var(--primary);
+      line-height: 1;
+      text-shadow: 0 0 10px var(--primary-glow);
+    }
+    .score .l {
+      font-size: 0.58rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+    .swap {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .swapbox {
+      background: rgba(10, 15, 30, 0.4);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .swapbox .t {
+      font-size: 0.68rem;
+      color: var(--muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-bottom: 8px;
+    }
+    .swapbox .t.in { color: var(--success); }
+    .swapbox .t.out { color: var(--repeated); }
+    .nums {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+    .num {
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 6px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+    }
+    .num.in { color: var(--success); border-color: rgba(16, 185, 129, 0.15); }
+    .num.out { color: var(--repeated); border-color: rgba(167, 139, 250, 0.15); }
+    .more {
+      font-size: 0.72rem;
+      color: var(--muted);
+      align-self: center;
+    }
+    
+    /* WhatsApp Share Box in Profile */
+    .share-preview-box {
+      background: rgba(10, 15, 30, 0.7);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      margin: 12px 0;
+      max-height: 140px;
+      overflow-y: auto;
+    }
+    .share-preview-box pre {
+      margin: 0;
+      font-family: 'Plus Jakarta Sans', monospace;
+      font-size: 0.78rem;
+      white-space: pre-wrap;
+      color: var(--text);
+      line-height: 1.4;
+    }
+    
+    /* Bottom Navigation floating menu */
+    nav {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 32px);
+      max-width: 600px;
+      background: rgba(21, 29, 53, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      display: flex;
+      padding: 8px 6px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      z-index: 40;
+      transition: transform 0.3s;
+    }
+    nav button {
+      flex: 1;
+      background: none;
+      border: 0;
+      color: var(--muted);
+      font-size: 0.68rem;
+      font-family: inherit;
+      font-weight: 700;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      padding: 6px 0;
+      transition: all 0.2s;
+      letter-spacing: 0.2px;
+    }
+    nav button .ic {
+      font-size: 20px;
+      transition: transform 0.2s;
+    }
+    nav button:hover {
+      color: var(--text);
+    }
+    nav button:hover .ic {
+      transform: translateY(-2px);
+    }
+    nav button.active {
+      color: var(--primary);
+    }
+    nav button.active .ic {
+      transform: scale(1.1) translateY(-2px);
+    }
+    nav .nbadge {
+      position: absolute;
+      transform: translate(12px, -4px);
+      background: var(--danger);
+      color: #fff;
+      font-size: 0.58rem;
+      font-weight: 800;
+      min-width: 16px;
+      height: 16px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      padding: 0 3px;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    /* Modals base styles */
+    .modal-bg {
+      position: fixed;
+      inset: 0;
+      background: rgba(3, 5, 10, 0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 100;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+    .modal-bg.show {
+      display: flex;
+      opacity: 1;
+    }
+    .modal {
+      background: var(--card-solid);
+      width: 100%;
+      max-width: 600px;
+      border-radius: 26px 26px 0 0;
+      border: 1px solid var(--border);
+      border-bottom: 0;
+      padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+      transform: translateY(100%);
+      transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+    }
+    .modal-bg.show .modal {
+      transform: translateY(0);
+    }
+    .modal .grab {
+      width: 46px;
+      height: 5px;
+      background: var(--border);
+      border-radius: 3px;
+      margin: 0 auto 16px;
+    }
+    
+    /* Card details layout inside modal */
+    .card-detail-layout {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    
+    /* Holographic Card Render inside detail modal */
+    .detail-card-preview {
+      width: 150px;
+      height: 210px;
+      border-radius: 16px;
+      background: var(--primary-gradient);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 14px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+      margin: 0 auto;
+      color: #000;
+      font-weight: 700;
+      overflow: hidden;
+      border: 2px solid rgba(255,255,255,0.25);
+    }
+    .detail-card-glow {
+      position: absolute;
+      top: -50%; left: -50%; width: 200%; height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 60%);
+      pointer-events: none;
+      animation: cardShine 6s linear infinite;
+    }
+    @keyframes cardShine {
+      0% { transform: translate(-30%, -30%) rotate(0deg); }
+      100% { transform: translate(-30%, -30%) rotate(360deg); }
+    }
+    .det-card-rarity {
+      font-size: 0.6rem;
+      background: rgba(0, 0, 0, 0.12);
+      padding: 2px 8px;
+      border-radius: 999px;
+      align-self: flex-start;
+      letter-spacing: 0.5px;
+    }
+    .det-card-num {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 850;
+      line-height: 1;
+      margin-top: 10px;
+    }
+    .det-card-symbol {
+      font-size: 38px;
+      text-align: center;
+      margin: 8px 0;
+    }
+    .det-card-name {
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.95rem;
+      letter-spacing: -0.2px;
+      text-align: center;
+      margin-top: auto;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 3px 6px;
+      border-radius: 6px;
+    }
+    .det-card-footer {
+      font-size: 0.58rem;
+      text-align: center;
+      opacity: 0.8;
+      margin-top: 4px;
+    }
+    
+    .detail-card-controls {
+      flex: 1;
+      min-width: 240px;
+    }
+    .control-section {
+      margin-top: 16px;
+    }
+    
+    /* Modern Slider Toggle */
+    .toggle-button-group {
+      display: flex;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+      padding: 3px;
+      border: 1px solid var(--border);
+    }
+    .btn-toggle {
+      flex: 1;
+      background: transparent;
+      border: 0;
+      color: var(--muted);
+      padding: 10px;
+      font-weight: 700;
+      font-size: 0.86rem;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+    .btn-toggle.active {
+      background: var(--success);
+      color: #fff;
+      box-shadow: 0 4px 10px var(--success-glow);
+    }
+    .btn-toggle.active.miss {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      box-shadow: none;
+    }
+    
+    /* Stepper count styles */
+    .stepper {
+      display: inline-flex;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+      padding: 3px;
+      border: 1px solid var(--border);
+      width: 140px;
+      justify-content: space-between;
+    }
+    .btn-step {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.05);
+      border: 0;
+      color: var(--text);
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: background 0.2s;
+    }
+    .btn-step:hover {
+      background: rgba(255,255,255,0.1);
+    }
+    .step-value {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 750;
+      color: var(--repeated);
+      width: 40px;
+      text-align: center;
+    }
+    
+    /* Match contextual list inside detailed modal */
+    .card-trade-context {
+      background: rgba(10, 15, 30, 0.4);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      margin-top: 18px;
+    }
+    .card-trade-context h3 {
+      font-size: 0.82rem;
+      margin: 0 0 8px;
+      color: var(--muted);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+    }
+    .trade-context-list {
+      font-size: 0.84rem;
+      line-height: 1.5;
+    }
+    .trade-context-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+    }
+    
+    /* Scheduling locations with visuals */
+    .opt {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-top: 8px;
+      cursor: pointer;
+      background: rgba(10, 15, 30, 0.35);
+      transition: all 0.2s;
+    }
+    .opt:hover {
+      background: rgba(10, 15, 30, 0.6);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+    .opt.on {
+      border-color: var(--primary);
+      background: rgba(255, 210, 63, 0.06);
+    }
+    .opt .ic {
+      font-size: 22px;
+    }
+    .opt .nm {
+      font-weight: 700;
+      font-size: 0.92rem;
+    }
+    .opt .ds {
+      font-size: 0.76rem;
+      color: var(--muted);
+      margin-top: 1px;
+    }
+    .opt .ck {
+      margin-left: auto;
+      color: var(--primary);
+      font-weight: 800;
+      font-size: 1.1rem;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .opt.on .ck {
+      opacity: 1;
+    }
+    
+    /* Interactive GPS Map visualizer */
+    .gps-map-card {
+      height: 110px;
+      background: radial-gradient(circle at center, #112b4c 0%, #0a1122 100%);
+      border: 1px solid rgba(91, 157, 255, 0.2);
+      border-radius: 12px;
+      margin-bottom: 12px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 10px 14px;
+    }
+    .gps-grid {
+      position: absolute;
+      inset: 0;
+      background-size: 20px 20px;
+      background-image: 
+        linear-gradient(to right, rgba(91, 157, 255, 0.06) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(91, 157, 255, 0.06) 1px, transparent 1px);
+    }
+    .gps-scanner {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 4px;
+      background: linear-gradient(180deg, rgba(91, 157, 255, 0.4), transparent);
+      animation: gpsScan 2.5s linear infinite;
+    }
+    @keyframes gpsScan {
+      0% { top: 0; }
+      100% { top: 100%; }
+    }
+    .gps-pin {
+      position: absolute;
+      font-size: 26px;
+      left: 50%;
+      top: 40%;
+      transform: translate(-50%, -50%);
+      filter: drop-shadow(0 2px 5px rgba(0,0,0,0.5));
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2);
+    }
+    .gps-pin::after {
+      content: '';
+      position: absolute;
+      bottom: 2px; left: 6px;
+      width: 14px; height: 14px;
+      background: rgba(91, 157, 255, 0.4);
+      border-radius: 50%;
+      z-index: -1;
+      transform: scale(1);
+      animation: sonarPulse 1.5s infinite;
+    }
+    @keyframes sonarPulse {
+      0% { transform: scale(0.5); opacity: 1; }
+      100% { transform: scale(2.2); opacity: 0; }
+    }
+    .gps-coordinates {
+      position: absolute;
+      top: 8px; right: 10px;
+      font-family: monospace;
+      font-size: 0.62rem;
+      color: rgba(91, 157, 255, 0.8);
+      background: rgba(0,0,0,0.4);
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid rgba(91, 157, 255, 0.1);
+    }
+    .gps-location-name {
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #9cd4ff;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+      position: relative;
+      z-index: 2;
+    }
+    
+    .chips {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .chip {
+      padding: 8px 12px;
+      border-radius: 9px;
+      border: 1px solid var(--border);
+      background: rgba(10, 15, 30, 0.35);
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.15s;
+    }
+    .chip:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+    .chip.on {
+      border-color: var(--primary);
+      background: rgba(255, 210, 63, 0.08);
+      color: var(--primary);
+    }
+    
+    .confirm {
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid var(--success);
+      border-radius: 14px;
+      padding: 16px;
+      margin-top: 14px;
+      display: none;
+    }
+    .confirm.show {
+      display: block;
+    }
+    .confirm .ttl {
+      color: var(--success);
+      font-weight: 800;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .confirm .det {
+      font-size: 0.84rem;
+      color: var(--text);
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+    
+    /* General classes */
+    .hidden {
+      display: none !important;
+    }
+    .scrolllock {
+      overflow: hidden;
+    }
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 18px 4px 4px;
+    }
+    .section-title h2 {
+      margin: 0;
+    }
+    .section-title .cnt {
+      margin-left: auto;
+      font-size: 0.76rem;
+      color: var(--muted);
+      background: rgba(255,255,255,0.05);
+      padding: 2px 7px;
+      border-radius: 8px;
+    }
+    
+    /* Premium Toast */
+    .toast {
+      position: fixed;
+      bottom: 96px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: rgba(21, 29, 53, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--text);
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      z-index: 200;
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.25);
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    
+    /* Fullscreen Card Pack Overlay */
+    .pack-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 6, 12, 0.94);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      z-index: 150;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .pack-overlay.show {
+      display: flex;
+    }
+    .pack-container {
+      width: 100%;
+      max-width: 500px;
+      text-align: center;
+    }
+    .pack-wrapper-view {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .booster-pack {
+      width: 180px;
+      height: 250px;
+      perspective: 1000px;
+      cursor: pointer;
+      position: relative;
+      margin-bottom: 20px;
+      transition: transform 0.3s;
+    }
+    .booster-pack:hover {
+      transform: scale(1.04) rotate(1deg);
+    }
+    .pack-front {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #2e1065 0%, #1e1b4b 100%);
+      border: 3px solid var(--repeated);
+      box-shadow: 0 15px 35px rgba(139, 92, 246, 0.4);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+    .pack-front::before {
+      content: '';
+      position: absolute;
+      top: -30%; left: -30%; width: 160%; height: 160%;
+      background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .pack-logo {
+      font-size: 60px;
+      margin-top: 10px;
+      animation: packFloat 2s ease-in-out infinite;
+    }
+    .pack-front h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 900;
+      margin: 0;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      text-shadow: 0 0 10px var(--primary-glow);
+    }
+    .pack-front p {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin: 0;
+      font-weight: bold;
+    }
+    .pack-shine {
+      position: absolute;
+      top: 0; left: -100%; width: 50%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transform: skewX(-20deg);
+      animation: packShineAnimation 4s infinite;
+    }
+    @keyframes packShineAnimation {
+      0% { left: -100%; }
+      30%, 100% { left: 200%; }
+    }
+    .pack-instruction {
+      font-size: 0.9rem;
+      color: var(--muted);
+      font-weight: 600;
+      margin: 10px 0 0;
+    }
+    
+    /* 3D Reveal Grid */
+    .pack-reveal-view h2 {
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin: 0 0 4px;
+    }
+    .pack-cards-grid {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 24px;
+    }
+    .card-flip-container {
+      width: 90px;
+      height: 126px;
+      perspective: 600px;
+      cursor: pointer;
+    }
+    .card-flip-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.25);
+      transform-style: preserve-3d;
+    }
+    .card-flip-container.flipped .card-flip-inner {
+      transform: rotateY(180deg);
+    }
+    .card-flip-front, .card-flip-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      box-shadow: 0 5px 12px rgba(0,0,0,0.3);
+    }
+    .card-flip-front {
+      background: linear-gradient(135deg, #101524 0%, #1c2742 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+      font-weight: bold;
+      border-color: rgba(255, 210, 63, 0.15);
+    }
+    .card-flip-front::after {
+      content: "⚡";
+      font-size: 20px;
+      margin-top: 4px;
+      filter: drop-shadow(0 0 5px var(--primary-glow));
+    }
+    .card-flip-back {
+      background: var(--card-solid);
+      transform: rotateY(180deg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px;
+      color: #000;
+    }
+    .card-flip-back.bg-lendario { background: var(--primary-gradient); }
+    .card-flip-back.bg-raro { background: var(--repeated-gradient); color: #fff; }
+    .card-flip-back.bg-comum { background: var(--cyan-gradient); }
+    
+    .flip-rarity {
+      font-size: 0.5rem;
+      background: rgba(0,0,0,0.12);
+      padding: 1px 6px;
+      border-radius: 99px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+    }
+    .flip-num {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 850;
+    }
+    .flip-name {
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.68rem;
+      background: rgba(255, 255, 255, 0.22);
+      padding: 2px 4px;
+      border-radius: 4px;
+      width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 700;
+    }
+    .flip-state-badge {
+      font-size: 0.5rem;
+      padding: 2px 6px;
+      border-radius: 99px;
+      background: rgba(0,0,0,0.8);
+      font-weight: bold;
+      letter-spacing: 0.3px;
+    }
+    .flip-state-badge.state-nova { color: #10b981; }
+    .flip-state-badge.state-rep { color: #c084fc; }
+    
+    /* Pack tear animation */
+    .booster-pack.tearing {
+      animation: packTearOpen 0.8s forwards;
+    }
+    @keyframes packTearOpen {
+      0% { transform: scale(1); opacity: 1; }
+      40% { transform: scale(1.05) rotate(-3deg); filter: brightness(1.2); }
+      70% { transform: scale(0.9) translateY(-10px) rotate(4deg); opacity: 0.8; }
+      100% { transform: scale(0.4) translateY(80px); opacity: 0; pointer-events: none; }
+    }
+    
+    /* Animation tabs loading */
+    .tab-content {
+      display: none;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.22s ease-out, transform 0.22s ease-out;
+    }
+    .tab-content.active {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="glow-bg glow-1"></div>
+  <div class="glow-bg glow-2"></div>
+
+  <div class="app">
+
+    <!-- ============ ONBOARDING ============ -->
+    <section id="onboarding">
+      <div class="hero">
+        <div class="big">📒🔁</div>
+        <h1>Figura Certa</h1>
+        <p>Marque as figurinhas que você tem e as repetidas. O app acha quem na <b>sua cidade</b> dá o melhor match de troca — e marca o ponto e o horário pra vocês se encontrarem.</p>
+      </div>
+
+      <div class="card">
+        <div class="features-list">
+          <div class="feat">
+            <div class="ic">✅</div>
+            <div>
+              <b>Controle do álbum</b>
+              <p>Veja quantas faltam pra completar, em tempo real.</p>
+            </div>
+          </div>
+          <div class="feat">
+            <div class="ic">🔁</div>
+            <div>
+              <b>Anote as repetidas</b>
+              <p>Toque longo no card para ver detalhes e editar as repetidas.</p>
+            </div>
+          </div>
+          <div class="feat">
+            <div class="ic">📍</div>
+            <div>
+              <b>Match na sua cidade</b>
+              <p>Vê quem tem o que você precisa e precisa do que você tem.</p>
+            </div>
+          </div>
+          <div class="feat">
+            <div class="ic">🤝</div>
+            <div>
+              <b>Ponto e horário</b>
+              <p>Escolha o ponto de troca e marque o encontro com mini-mapa.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px">
+        <h2>Bora começar 🚀</h2>
+        
+        <label for="ob-name">Seu nome</label>
+        <input id="ob-name" placeholder="Ex: Leandro" autocomplete="off">
+        <div style="height:12px"></div>
+        
+        <label for="ob-city">Sua cidade</label>
+        <select id="ob-city"></select>
+        <div style="height:12px"></div>
+
+        <label for="ob-email">Seu e-mail</label>
+        <input id="ob-email" type="email" placeholder="voce@email.com" autocomplete="email" inputmode="email">
+        <div class="field-error" id="ob-email-err"></div>
+        <div style="height:12px"></div>
+
+        <label for="ob-phone">Seu telefone</label>
+        <div class="phone-group">
+          <select id="ob-country" class="phone-country" aria-label="País"></select>
+          <input id="ob-phone" class="phone-number" type="tel" inputmode="tel" autocomplete="tel" placeholder="">
+        </div>
+        <!-- Campo único agrupado (DDI + telefone) enviado no submit -->
+        <input type="hidden" id="ob-phone-full" name="phone">
+        <div style="height:12px"></div>
+
+        <div class="row">
+          <div>
+            <label for="ob-album">Álbum</label>
+            <select id="ob-album"></select>
+          </div>
+        </div>
+        
+        <div style="height:18px"></div>
+        <button class="btn" id="ob-start">Criar meu álbum</button>
+        <p class="muted" style="margin-top:12px;text-align:center">Tudo fica salvo localmente no seu navegador.</p>
+      </div>
+    </section>
+
+    <!-- ============ MAIN APP ============ -->
+    <div id="main" class="hidden">
+      <header>
+        <div class="brand">
+          <div class="logo">📒</div>
+          <div>
+            <h1>Figura Certa</h1>
+            <div class="sub" id="album-sub">—</div>
+          </div>
+          <div class="who">
+            <b id="who-name">—</b>
+            <span id="who-city">📍 Curitiba</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- ===== TAB: ALBUM ===== -->
+      <div id="tab-album" class="wrap tab-content">
+        
+        <!-- Dashboard Progress -->
+        <div class="card">
+          <div class="progress-container-card">
+            
+            <!-- SVG Premium Circle Gauge -->
+            <div class="progress-ring-container">
+              <svg width="86" height="86">
+                <circle class="progress-ring-bg" stroke="rgba(255,255,255,0.05)" stroke-width="6" fill="transparent" r="38" cx="43" cy="43"/>
+                <circle class="progress-ring-circle" id="bar-ring" stroke="var(--success)" stroke-width="6" fill="transparent" r="38" cx="43" cy="43" stroke-dasharray="238.76" stroke-dashoffset="238.76"/>
+              </svg>
+              <div class="progress-ring-text" id="s-pct">0%</div>
+            </div>
+            
+            <div class="stats-layout">
+              <h2>Meu Álbum</h2>
+              <div class="stats-grid-small">
+                <div class="stat-card-small have-col">
+                  <div class="num" id="s-have">0</div>
+                  <div class="lbl">Tenho</div>
+                </div>
+                <div class="stat-card-small miss-col">
+                  <div class="num" id="s-miss">0</div>
+                  <div class="lbl">Faltam</div>
+                </div>
+                <div class="stat-card-small rep-col">
+                  <div class="num" id="s-rep">0</div>
+                  <div class="lbl">Repetidas</div>
+                </div>
+              </div>
+            </div>
+            
+          </div>
+          <p class="complete-message-p" id="complete-msg">Carregando informações...</p>
+        </div>
+
+        <!-- Card Pack Simulator Widget -->
+        <div class="card pack-banner-card">
+          <div class="pack-banner-layout">
+            <div class="pack-banner-icon">🎁</div>
+            <div class="pack-banner-details">
+              <h3>Simulador de Pacotinhos</h3>
+              <p>Abra um pacote diário grátis de 5 figurinhas para te ajudar a completar seu álbum!</p>
+              <div class="pack-action-row">
+                <button class="btn sm" id="btn-open-pack">Carregando...</button>
+                <span class="skip-cooldown-link hidden" id="btn-pack-skip-cooldown">Pular Cooldown (Demo)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Album Grid Section -->
+        <div class="card" style="margin-top:16px">
+          <div class="toolbar">
+            <div class="toolbar-search-wrap">
+              <span>🔎</span>
+              <input id="search" placeholder="Ir para o número..." inputmode="numeric">
+            </div>
+          </div>
+          
+          <div class="filter-scroll-container">
+            <div class="filter-chip active" data-filter="all">Todas</div>
+            <div class="filter-chip" data-filter="miss">Faltam</div>
+            <div class="filter-chip" data-filter="have">Tenho</div>
+            <div class="filter-chip" data-filter="rep">Repetidas</div>
+          </div>
+
+          <div class="legend">
+            <span><i class="dot miss"></i> Falta</span>
+            <span><i class="dot have"></i> Tenho</span>
+            <span><i class="dot rep"></i> Repetida</span>
+          </div>
+          
+          <div class="grid" id="grid"></div>
+          <p class="hint" style="margin-top:12px; text-align:center;">
+            Toque rápido: <b>Falta ⇄ Tenho ⇄ Repetida</b>.<br>Toque longo: <b>Ver detalhes do card</b>.
+          </p>
+        </div>
+      </div>
+
+      <!-- ===== TAB: TRADES ===== -->
+      <div id="tab-trade" class="wrap tab-content">
+        <div class="card">
+          <h2>🤝 Trocas em <span class="em" id="trade-city">—</span></h2>
+          <p class="muted">Colecionadores que têm as figurinhas que <b>você precisa</b> e buscam as suas <b>repetidas</b>. Ordenado pelo maior match.</p>
+        </div>
+        <div id="matches"></div>
+      </div>
+
+      <!-- ===== TAB: MEETS ===== -->
+      <div id="tab-meets" class="wrap tab-content">
+        <div class="card">
+          <h2>📅 Minhas trocas marcadas</h2>
+          <p class="muted">Encontros marcados com outros colecionadores para troca.</p>
+        </div>
+        <div id="meets"></div>
+      </div>
+
+      <!-- ===== TAB: PROFILE ===== -->
+      <div id="tab-profile" class="wrap tab-content">
+        <div class="card">
+          <h2>👤 Meu perfil</h2>
+          <label for="pf-name">Nome</label>
+          <input id="pf-name">
+          <div style="height:12px"></div>
+          <label for="pf-city">Cidade</label>
+          <select id="pf-city"></select>
+          <div style="height:16px"></div>
+          <button class="btn" id="pf-save">Salvar Alterações</button>
+        </div>
+        
+        <!-- WhatsApp Share Tool -->
+        <div class="card">
+          <h2>📋 Exportar p/ WhatsApp</h2>
+          <p class="muted">Gere um texto formatado da sua lista de faltantes e repetidas para compartilhar em redes sociais e acelerar suas trocas.</p>
+          <div class="share-preview-box">
+            <pre id="share-preview">Carregando lista...</pre>
+          </div>
+          <button class="btn accent" id="pf-share-wa">
+            <span>💬</span> Copiar Lista e Compartilhar
+          </button>
+        </div>
+
+        <div class="card">
+          <h2>⚡ Atalhos e Testes</h2>
+          <button class="btn sec" id="demo-fill">🎲 Preencher álbum de exemplo</button>
+          <div style="height:10px"></div>
+          <button class="btn ghost" id="reset">Apagar tudo e recomeçar</button>
+        </div>
+        <div class="card">
+          <h2>ℹ️ Como funciona o Match Score?</h2>
+          <p class="muted">O <b>score</b> é o total de figurinhas que dá pra trocar entre vocês: as repetidas dele que você precisa <b>+</b> as suas repetidas que ele precisa. Quanto maior o score, melhor a troca.</p>
+        </div>
+      </div>
+
+      <!-- Floating Bottom navigation -->
+      <nav id="nav" class="hidden">
+        <button data-tab="album" class="active"><span class="ic">📒</span>Álbum</button>
+        <button data-tab="trade"><span class="ic">🔁</span><span id="nav-trade-badge"></span>Trocas</button>
+        <button data-tab="meets"><span class="ic">📅</span>Encontros</button>
+        <button data-tab="profile"><span class="ic">👤</span>Perfil</button>
+      </nav>
+    </div>
+  </div>
+
+  <!-- ===== PREMIUM CARD DETAIL DRAWER (MODAL) ===== -->
+  <div class="modal-bg" id="card-details-modal">
+    <div class="modal">
+      <div class="grab"></div>
+      
+      <div class="card-detail-layout">
+        <!-- Holographic Card Display -->
+        <div class="detail-card-preview" id="det-card-preview">
+          <div class="detail-card-glow"></div>
+          <div class="det-card-rarity" id="det-card-rarity">COMUM</div>
+          <div class="det-card-num" id="det-card-num">00</div>
+          <div class="det-card-symbol" id="det-card-symbol">⚽</div>
+          <div class="det-card-name" id="det-card-name">Jogador</div>
+          <div class="det-card-footer" id="det-card-album">Copa do Mundo 2026</div>
+        </div>
+        
+        <!-- Controls -->
+        <div class="detail-card-controls">
+          <h2 id="det-card-title-text">Figurinha #00</h2>
+          <p class="muted" id="det-card-rarity-desc" style="margin-top: -10px; margin-bottom: 12px; font-weight: 600; font-size: 0.8rem;"></p>
+          
+          <div class="control-section">
+            <label>Estado no Álbum</label>
+            <div class="toggle-button-group">
+              <button class="btn-toggle" id="det-toggle-have">Tenho</button>
+              <button class="btn-toggle miss" id="det-toggle-miss">Falta</button>
+            </div>
+          </div>
+          
+          <div class="control-section" id="det-repeated-section">
+            <label>Repetidas para Troca</label>
+            <div class="stepper">
+              <button class="btn-step" id="det-step-dec">—</button>
+              <div class="step-value" id="det-rep-count">0</div>
+              <button class="btn-step" id="det-step-inc">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Matchmaking Context -->
+      <div class="card-trade-context" id="det-trade-context">
+        <h3>🤝 Matches próximos</h3>
+        <div class="trade-context-list" id="det-trade-list">
+          <div class="muted">Nenhum match para esta figurinha no momento.</div>
+        </div>
+      </div>
+
+      <div style="height:18px"></div>
+      <button class="btn" id="det-close-btn">Confirmar e Fechar</button>
+    </div>
+  </div>
+
+  <!-- ===== TRADE SCHEDULING MODAL ===== -->
+  <div class="modal-bg" id="trade-modal">
+    <div class="modal">
+      <div class="grab"></div>
+      <h2>Marcar troca com <span class="em" id="tm-name">—</span></h2>
+
+      <!-- GPS Interactive Mock Map Visualizer -->
+      <div class="section-title"><h2>📍 Ponto de troca</h2></div>
+      <div class="gps-map-card">
+        <div class="gps-scanner"></div>
+        <div class="gps-grid"></div>
+        <div class="gps-pin" id="gps-pin">📍</div>
+        <div class="gps-coordinates" id="gps-coords">S 00° 00' 00" W 00° 00' 00"</div>
+        <div class="gps-location-name" id="gps-loc-name">Selecione um local abaixo</div>
+      </div>
+      
+      <div id="tm-points"></div>
+
+      <div class="section-title"><h2>🕐 Dia e horário</h2></div>
+      <div class="chips" id="tm-days" style="margin-top:8px"></div>
+      <div class="chips" id="tm-times" style="margin-top:10px"></div>
+
+      <div class="confirm" id="tm-confirm">
+        <div class="ttl">✅ Troca combinada!</div>
+        <div class="det" id="tm-confirm-det"></div>
+      </div>
+
+      <div style="height:18px"></div>
+      <button class="btn" id="tm-go">Confirmar Encontro</button>
+      <div style="height:8px"></div>
+      <button class="btn ghost" id="tm-cancel">Fechar</button>
+    </div>
+  </div>
+
+  <!-- ===== PACK OPENING INTERACTIVE OVERLAY ===== -->
+  <div class="pack-overlay" id="pack-overlay">
+    <div class="pack-container">
+      
+      <div class="pack-wrapper-view" id="pack-wrapper-view">
+        <div class="booster-pack" id="booster-pack">
+          <div class="pack-front">
+            <div class="pack-logo" id="pack-wrapper-logo">⭐</div>
+            <h2>PACOTE EXTRA</h2>
+            <p>5 FIGURINHAS</p>
+            <div class="pack-shine"></div>
+          </div>
+        </div>
+        <p class="pack-instruction">Toque no pacote para abrir! ⚡</p>
+      </div>
+
+      <div class="pack-reveal-view hidden" id="pack-reveal-view">
+        <h2>Suas Figurinhas 🎁</h2>
+        <p class="muted">Toque em cada carta para revelar!</p>
+        <div class="pack-cards-grid" id="pack-cards-grid"></div>
+        
+        <div style="display:flex; justify-content:center; width:100%;">
+          <button class="btn hidden" id="btn-pack-collect" style="margin-top: 24px; max-width: 280px;">
+            Guardar no Álbum
+          </button>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    "use strict";
+
+    /* =================== Data =================== */
+    const ALBUMS = [
+      {id:'copa',   name:'Copa do Mundo 2026', total:670, emoji:'⚽'},
+      {id:'brasil', name:'Brasileirão 2026',   total:480, emoji:'🇧🇷'},
+      {id:'animais',name:'Reino Animal',       total:240, emoji:'🦁'},
+      {id:'herois', name:'Super-Heróis',       total:300, emoji:'🦸'},
+      {id:'mini',   name:'Álbum Teste (60)',   total:60,  emoji:'🧪'},
+    ];
+    const CITIES = ['São Paulo','Rio de Janeiro','Belo Horizonte','Curitiba','Porto Alegre','Salvador','Recife','Fortaleza','Brasília','Campinas'];
+
+    /* Países: bandeira, DDI e máscara do telefone ('#' = dígito) */
+    const COUNTRIES = [
+      {code:'BR', name:'Brasil',          flag:'🇧🇷', dial:'+55',  mask:'(##) #####-####'},
+      {code:'PT', name:'Portugal',        flag:'🇵🇹', dial:'+351', mask:'### ### ###'},
+      {code:'US', name:'Estados Unidos',  flag:'🇺🇸', dial:'+1',   mask:'(###) ###-####'},
+      {code:'CA', name:'Canadá',          flag:'🇨🇦', dial:'+1',   mask:'(###) ###-####'},
+      {code:'AR', name:'Argentina',       flag:'🇦🇷', dial:'+54',  mask:'(##) ####-####'},
+      {code:'UY', name:'Uruguai',         flag:'🇺🇾', dial:'+598', mask:'# ### ## ##'},
+      {code:'PY', name:'Paraguai',        flag:'🇵🇾', dial:'+595', mask:'(###) ### ###'},
+      {code:'CL', name:'Chile',           flag:'🇨🇱', dial:'+56',  mask:'# #### ####'},
+      {code:'CO', name:'Colômbia',        flag:'🇨🇴', dial:'+57',  mask:'### ### ####'},
+      {code:'PE', name:'Peru',            flag:'🇵🇪', dial:'+51',  mask:'### ### ###'},
+      {code:'MX', name:'México',          flag:'🇲🇽', dial:'+52',  mask:'## #### ####'},
+      {code:'ES', name:'Espanha',         flag:'🇪🇸', dial:'+34',  mask:'### ## ## ##'},
+      {code:'FR', name:'França',          flag:'🇫🇷', dial:'+33',  mask:'# ## ## ## ##'},
+      {code:'IT', name:'Itália',          flag:'🇮🇹', dial:'+39',  mask:'### ### ####'},
+      {code:'DE', name:'Alemanha',        flag:'🇩🇪', dial:'+49',  mask:'#### #######'},
+      {code:'GB', name:'Reino Unido',     flag:'🇬🇧', dial:'+44',  mask:'#### ######'},
+      {code:'JP', name:'Japão',           flag:'🇯🇵', dial:'+81',  mask:'## #### ####'},
+      {code:'AU', name:'Austrália',       flag:'🇦🇺', dial:'+61',  mask:'### ### ###'},
+    ];
+    const DEFAULT_COUNTRY = 'BR';
+    function findCountry(code){ return COUNTRIES.find(c=>c.code===code) || COUNTRIES.find(c=>c.code===DEFAULT_COUNTRY); }
+
+    /* Aplica a máscara do país sobre os dígitos digitados */
+    function applyPhoneMask(value, mask){
+      const digits = (value||'').replace(/\D/g,'');
+      let out=''; let di=0;
+      for(let i=0;i<mask.length && di<digits.length;i++){
+        if(mask[i]==='#'){ out += digits[di++]; } else { out += mask[i]; }
+      }
+      return out;
+    }
+    function maskDigitCount(mask){ return (mask.match(/#/g)||[]).length; }
+
+    /* Detecta o país do usuário: IP -> locale -> padrão */
+    async function detectCountry(){
+      try {
+        const r = await fetch('https://ipapi.co/json/');
+        if (r.ok){ const j = await r.json(); if (j && j.country_code && findCountry(j.country_code).code===j.country_code) return j.country_code; }
+      } catch(e){ /* offline ou bloqueado: usa fallback */ }
+      const loc = (navigator.language || navigator.languages?.[0] || '');
+      const region = loc.split('-')[1];
+      if (region && findCountry(region.toUpperCase()).code === region.toUpperCase()) return region.toUpperCase();
+      return DEFAULT_COUNTRY;
+    }
+
+    /* =================== Validação de e-mail =================== */
+
+    // Domínios "descartáveis": e-mails temporários que somem depois de um tempo
+    const DISPOSABLE_DOMAINS = [
+      'mailinator.com','guerrillamail.com','10minutemail.com','tempmail.com','temp-mail.org',
+      'throwawaymail.com','maildrop.cc','yopmail.com','getnada.com','trashmail.com',
+      'fakeinbox.com','sharklasers.com','dispostable.com','mailnesia.com','tempinbox.com'
+    ];
+
+    // Domínios populares e os erros de digitação mais comuns de cada um
+    const DOMAIN_TYPOS = {
+      'gmail.com':   ['gmial.com','gmai.com','gmil.com','gnail.com','gamil.com','gmaill.com','gmail.con','gmail.co','gmail.cm','gmail.om'],
+      'hotmail.com': ['hotmial.com','hotmai.com','hotmal.com','hitmail.com','hotmail.con','hotmail.co','hotmil.com'],
+      'outlook.com': ['outlok.com','outloo.com','outook.com','outlook.con','outlook.co'],
+      'yahoo.com':   ['yaho.com','yahooo.com','yhoo.com','yahoo.con','yahoo.co'],
+      'icloud.com':  ['iclod.com','iclould.com','icloud.con','icloud.co']
+    };
+
+    // Apelidos "de teste" que as pessoas digitam quando não querem dar o e-mail real
+    const FAKE_LOCAL_PARTS = [
+      'asdf','asdfasdf','asdfg','asdfgh','asd','qwerty','qwer','qweqwe',
+      'teste','test','testing','test123','aaa','aaaa','abc','abcabc',
+      'xxx','xxxx','fulano','sicrano','naotem','nao','email','semail'
+    ];
+
+    // Recebe o e-mail digitado e devolve { ok:true } ou { ok:false, msg:'...' }
+    function validateEmail(raw){
+      const email = (raw || '').trim();
+
+      // 1) Está vazio?
+      if (!email) return { ok:false, msg:'Faltou o e-mail aqui 🙂' };
+
+      // 2) Tem espaço no meio? E-mail não pode.
+      if (/\s/.test(email)) return { ok:false, msg:'Seu e-mail não pode ter espaços. Apague os espacinhos.' };
+
+      // 3) Tem que ter exatamente um @
+      const partes = email.split('@');
+      if (partes.length < 2) return { ok:false, msg:'Esse e-mail parece não ser válido: faltou o @.' };
+      if (partes.length > 2) return { ok:false, msg:'Seu e-mail tem mais de um @. Deixe só um.' };
+
+      const usuario = partes[0];                 // o que vem antes do @
+      const dominio = partes[1].toLowerCase();   // o que vem depois do @
+
+      // 4) Precisa ter algo antes e depois do @
+      if (!usuario) return { ok:false, msg:'Falta a parte antes do @ (o seu nome de usuário).' };
+      if (!dominio) return { ok:false, msg:'Falta a parte depois do @ (o provedor, tipo gmail.com).' };
+
+      // 5) Antes do @ só vale letra, número e . _ % + -  (nada de # ! $ etc.)
+      if (!/^[A-Za-z0-9._%+\-]+$/.test(usuario))
+        return { ok:false, msg:'Esse e-mail tem símbolos que não valem (como # ou !). Confira a parte antes do @.' };
+
+      // 6) O domínio precisa ter um ponto (pra existir o final, tipo .com)
+      if (!dominio.includes('.'))
+        return { ok:false, msg:'Faltou o final do e-mail, tipo “.com” ou “.com.br”.' };
+
+      // 7) Ponto fora do lugar: no começo, no fim, ou dois pontos seguidos
+      if (email.startsWith('.') || email.endsWith('.') || email.includes('..') || usuario.endsWith('.') || dominio.startsWith('.'))
+        return { ok:false, msg:'Tem um ponto fora do lugar no seu e-mail.' };
+
+      // 8) O finalzinho depois do último ponto (o "TLD") tem que ser só letras e ter 2+
+      const final = dominio.split('.').pop();
+      if (!/^[a-z]{2,}$/.test(final))
+        return { ok:false, msg:'O final do e-mail (depois do último ponto) parece errado.' };
+
+      // 9) É um e-mail temporário/descartável?
+      if (DISPOSABLE_DOMAINS.includes(dominio))
+        return { ok:false, msg:'Esse e-mail é temporário e vai expirar. Use um e-mail de verdade pra não perder seu álbum.' };
+
+      // 10) O domínio parece um erro de digitação de um provedor famoso? Sugere o certo.
+      for (const certo in DOMAIN_TYPOS){
+        if (DOMAIN_TYPOS[certo].includes(dominio))
+          return { ok:false, msg:'Acho que você quis dizer', suggestion:certo };
+      }
+
+      // 11) A parte antes do @ é só um "teste" (asdf, teste, 1234...)?
+      const usuarioMin = usuario.toLowerCase();
+      if (FAKE_LOCAL_PARTS.includes(usuarioMin))
+        return { ok:false, msg:'Esse email parece não ser válido. Coloque o seu e-mail de verdade 🙂' };
+
+      // 12) Só uma letra repetida (aaaa) ou só números (123456) antes do @
+      if (/^(.)\1+$/.test(usuarioMin) || /^\d+$/.test(usuarioMin))
+        return { ok:false, msg:'Esse email parece não ser válido. Coloque o seu e-mail de verdade 🙂' };
+
+      // Passou em todos os testes!
+      return { ok:true };
+    }
+
+    // Mostra a mensagenzinha vermelha embaixo do campo.
+    // Se vier uma "suggestion", monta um link clicável que corrige o e-mail.
+    function showEmailError(msg, suggestion){
+      const el = $('#ob-email-err');
+      if (suggestion){
+        el.innerHTML = '';
+        el.append(document.createTextNode((msg || 'Acho que você quis dizer') + ' '));
+        const link = document.createElement('a');
+        link.href = '#';
+        link.className = 'email-fix';
+        link.textContent = '@' + suggestion;
+        link.title = 'Clique para corrigir';
+        link.addEventListener('click', (e)=>{ e.preventDefault(); applyEmailSuggestion(suggestion); });
+        el.append(link);
+        el.append(document.createTextNode(' 😉'));
+      } else {
+        el.textContent = msg;
+      }
+      el.classList.add('show');
+      $('#ob-email').classList.add('invalid');
+    }
+    // Troca o domínio do e-mail pela sugestão e confere de novo
+    function applyEmailSuggestion(dominioCerto){
+      const inp = $('#ob-email');
+      const usuario = inp.value.trim().split('@')[0];
+      inp.value = usuario + '@' + dominioCerto;
+      clearEmailError();
+      inp.focus();
+      const r = validateEmail(inp.value);   // se ainda houver outro problema, mostra
+      if (!r.ok) showEmailError(r.msg, r.suggestion);
+    }
+    // Esconde a mensagem de erro
+    function clearEmailError(){
+      $('#ob-email-err').classList.remove('show');
+      $('#ob-email').classList.remove('invalid');
+    }
+    // Liga a validação: confere quando a pessoa sai do campo; limpa o aviso enquanto digita
+    function setupEmailField(){
+      const inp = $('#ob-email');
+      inp.addEventListener('blur', ()=>{
+        if (!inp.value.trim()) { clearEmailError(); return; }
+        const r = validateEmail(inp.value);
+        if (r.ok) clearEmailError(); else showEmailError(r.msg, r.suggestion);
+      });
+      inp.addEventListener('input', clearEmailError);
+    }
+
+    const POINTS = {
+      default:[
+        {ic:'🏬',nm:'Shopping (praça de alimentação)',ds:'Lugar movimentado e seguro'},
+        {ic:'🏪',nm:'Banca de jornal do centro',ds:'Ponto clássico de troca'},
+        {ic:'🌳',nm:'Praça central',ds:'Fim de semana de manhã'},
+        {ic:'🏟️',nm:'Em frente ao estádio',ds:'Em dia de jogo'},
+        {ic:'☕',nm:'Cafeteria combinada',ds:'Mais tranquilo'},
+      ]
+    };
+    const DAYS = ['Hoje','Amanhã','Sábado','Domingo'];
+    const TIMES = ['Manhã','Almoço','Tarde','Fim de tarde','Noite'];
+    const AVA_COLORS = ['#ffd23f','#34d399','#5b9dff','#a78bfa','#ff8a00','#ff6b6b','#22d3ee','#f472b6'];
+
+    /* GPS Coordinates Mock for points */
+    const MAP_COORDS = [
+      { coords: 'S 23° 33\' 41" W 46° 39\' 20"', x: 30, y: -20 },
+      { coords: 'S 23° 32\' 51" W 46° 38\' 10"', x: -40, y: 30 },
+      { coords: 'S 23° 32\' 12" W 46° 37\' 55"', x: 50, y: 15 },
+      { coords: 'S 23° 31\' 05" W 46° 36\' 40"', x: -10, y: -45 },
+      { coords: 'S 23° 33\' 15" W 46° 38\' 50"', x: -25, y: -10 }
+    ];
+
+    /* Mock names for neighbor collectors */
+    const NAMES = ['José','Maria','Pedro','Ana','Carlos','Júlia','Rafael','Beatriz','Lucas','Camila','Bruno','Fernanda','Diego','Larissa','Thiago','Mariana','Gustavo','Patrícia','Felipe','Sofia'];
+
+    /* =================== State =================== */
+    let S = null; // app state
+    const $ = s=>document.querySelector(s);
+    const $$ = s=>Array.from(document.querySelectorAll(s));
+    const LS = 'figuracerta_v1';
+
+    function save(){ localStorage.setItem(LS, JSON.stringify(S)); }
+    function load(){ try{ return JSON.parse(localStorage.getItem(LS)); }catch(e){ return null; } }
+
+    /* Deterministic hash generator */
+    function hashStr(s){ let h=2166136261; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619);} return h>>>0; }
+
+    /* Deterministic pseudo-random so neighbors are stable per session */
+    function mulberry(seed){ return function(){ let t=seed+=0x6D2B79F5; t=Math.imul(t^t>>>15,t|1); t^=t+Math.imul(t^t>>>7,t|61); return ((t^t>>>14)>>>0)/4294967296; }; }
+
+    /* =================== Sticker Info Generator (Premium addition) =================== */
+    function getStickerInfo(n, albumId) {
+      const h = hashStr(albumId + '|' + n);
+      const pct = (h % 100);
+      
+      let rarity = 'Comum';
+      let rarityText = 'Comum';
+      let color = 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)'; // Cyan-Blue for Commons
+      
+      if (pct < 6 || n === 10 || n === 7 || n === 30 || n === 100) {
+        rarity = 'Lendário';
+        rarityText = 'Lendária ★';
+        color = 'linear-gradient(135deg, #ffd23f 0%, #ff8a00 100%)'; // Gold
+      } else if (pct < 25 || n === 9 || n === 18 || n === 22) {
+        rarity = 'Raro';
+        rarityText = 'Rara ✦';
+        color = 'linear-gradient(135deg, #c084fc 0%, #7c3aed 100%)'; // Purple
+      }
+
+      let name = '';
+      if (albumId === 'copa') {
+        if (n === 10) name = "Neymar Jr";
+        else if (n === 7) name = "C. Ronaldo";
+        else if (n === 30) name = "Lionel Messi";
+        else if (n === 9) name = "Kylian Mbappé";
+        else if (n === 18) name = "Vinícius Jr";
+        else if (n === 22) name = "J. Bellingham";
+        else if (n === 27) name = "Lamine Yamal";
+        else if (n === 100) name = "Pelé";
+        else {
+          const firsts = ["Lucas", "Matheus", "Gabriel", "Bruno", "Felipe", "Thiago", "Diego", "Arthur", "Gustavo", "Enzo", "Harry", "Thomas", "Antoine", "Marco", "Julian", "Marcus", "Samuel", "David", "Christian", "Alexis", "Rodrygo", "Richarlison", "Casemiro", "Alisson", "Ederson", "Raphinha", "Paquetá"];
+          const lasts = ["Silva", "Santos", "Souza", "Oliveira", "Pereira", "Lima", "Carvalho", "Ferreira", "Rodrigues", "Almeida", "Gomes", "Costa", "Smith", "Johnson", "Williams", "Jones", "Militao", "Guimaraes", "Martinelli", "Endrick"];
+          name = firsts[h % firsts.length] + ' ' + lasts[(h >> 2) % lasts.length];
+        }
+      } else if (albumId === 'brasil') {
+        if (n === 10) name = "Estêvão";
+        else if (n === 8) name = "Arrascaeta";
+        else if (n === 7) name = "Lucas Moura";
+        else if (n === 9) name = "Pedro";
+        else if (n === 11) name = "Hulk";
+        else {
+          const firsts = ["Estêvão", "Raphael", "Everton", "Gustavo", "Alan", "Ganso", "Yuri", "Pedro", "Igor", "Luciano", "Calleri", "Matheus", "Tiquinho", "Gerson", "Fernandinho", "Hulk", "Paulinho", "Deyverson", "Léo", "David", "Guilherme", "Lucas", "Alerrandro", "Luiz"];
+          const lasts = ["Veiga", "Cebolinha", "Gómez", "Patrick", "Alberto", "Guilherme", "Coronado", "Moura", "Pereira", "Soares", "Sanches", "Henrique", "Moraes", "Ortiz", "Luiz", "Arana", "Jair", "Melo", "Piton"];
+          name = firsts[h % firsts.length] + ' ' + lasts[(h >> 2) % lasts.length];
+        }
+      } else if (albumId === 'animais') {
+        const animals = ["Leão", "Tigre", "Águia Real", "Urso Polar", "Leopardo", "Guepardo", "Lobo", "Gorila", "Panda", "Elefante", "Rinoceronte", "Hipopótamo", "Girafa", "Zebra", "Canguru", "Coala", "Ornitorrinco", "Golfinho", "Baleia Azul", "Tubarão Branco", "Polvo Gigante", "Água-Viva", "Tartaruga Marinha", "Camaleão", "Jacaré", "Pinguim", "Coruja", "Arara Azul", "Tucano", "Tamanduá-Bandeira", "Capivara", "Mico-Leão-Dourado", "Onça-Pintada", "Lobo-Guará", "Ariranha"];
+        name = animals[h % animals.length];
+        if (rarity === 'Lendário') name = "👑 " + name;
+      } else if (albumId === 'herois') {
+        const prefixes = ["Super-", "Capitão ", "Homem-", "Mulher-", "Lorde ", "Agente ", "Doutor ", "Mestre ", "Cavaleiro ", "Guardião "];
+        const nouns = ["Trovão", "Luz", "Sombra", "Aço", "Fogo", "Gelo", "Ferro", "Cristal", "Vento", "Estrela", "Laser", "Tempo", "Caos", "Espaço", "Escudo", "Guerreiro", "Defensor", "Fênix"];
+        name = prefixes[h % prefixes.length] + nouns[(h >> 2) % nouns.length];
+      } else {
+        name = "Figurinha Especial #" + n;
+      }
+
+      return { name, rarity, rarityText, color };
+    }
+
+    /* =================== Init =================== */
+    function boot(){
+      S = load();
+      // populate onboarding selects
+      fillSelect($('#ob-city'), CITIES);
+      $('#ob-album').innerHTML = ALBUMS.map(a=>`<option value="${a.id}">${a.emoji} ${a.name} (${a.total})</option>`).join('');
+      fillSelect($('#pf-city'), CITIES);
+      setupPhoneField();
+      setupEmailField();
+
+      if(S && S.name){
+        // Backward compatibility for cooldowns
+        if (S.lastPackTime === undefined) {
+          S.lastPackTime = 0;
+          S.packsOpened = 0;
+        }
+        showApp();
+      }else{
+        $('#onboarding').classList.remove('hidden');
+      }
+    }
+    function fillSelect(el, arr){ el.innerHTML = arr.map(c=>`<option>${c}</option>`).join(''); }
+
+    /* Monta o campo de telefone (bandeirinha + máscara + campo agrupado) */
+    function setupPhoneField(){
+      const selCountry = $('#ob-country');
+      const inpPhone   = $('#ob-phone');
+      selCountry.innerHTML = COUNTRIES.map(c=>`<option value="${c.code}">${c.flag} ${c.dial}</option>`).join('');
+
+      function applyCountry(code){
+        const c = findCountry(code);
+        selCountry.value = c.code;
+        inpPhone.placeholder = c.mask;
+        inpPhone.value = applyPhoneMask(inpPhone.value, c.mask);
+        updatePhoneFull();
+      }
+      function updatePhoneFull(){
+        // Agrupa os dois campos em um só: DDI + telefone (somente dígitos)
+        const c = findCountry(selCountry.value);
+        const digits = inpPhone.value.replace(/\D/g,'');
+        $('#ob-phone-full').value = digits ? (c.dial + digits) : '';
+      }
+
+      selCountry.addEventListener('change', ()=> applyCountry(selCountry.value));
+      inpPhone.addEventListener('input', ()=>{
+        const c = findCountry(selCountry.value);
+        inpPhone.value = applyPhoneMask(inpPhone.value, c.mask);
+        updatePhoneFull();
+      });
+
+      // Pré-seleciona o país padrão na hora e atualiza assim que detectar
+      applyCountry(DEFAULT_COUNTRY);
+      detectCountry().then(applyCountry);
+    }
+
+    $('#ob-start').onclick = ()=>{
+      const name = $('#ob-name').value.trim();
+      if(!name){ toast('Digite seu nome 🙂'); $('#ob-name').focus(); return; }
+
+      const email = $('#ob-email').value.trim();
+      const emailCheck = validateEmail(email);
+      if(!emailCheck.ok){
+        showEmailError(emailCheck.msg, emailCheck.suggestion);
+        toast(emailCheck.suggestion ? `Você quis dizer @${emailCheck.suggestion}?` : emailCheck.msg);
+        $('#ob-email').focus();
+        return;
+      }
+      clearEmailError();
+
+      const country = findCountry($('#ob-country').value);
+      const phoneDigits = $('#ob-phone').value.replace(/\D/g,'');
+      if(phoneDigits.length < maskDigitCount(country.mask)){ toast('Digite seu telefone completo 📱'); $('#ob-phone').focus(); return; }
+      const phone = country.dial + phoneDigits; // campo único agrupado (DDI + telefone)
+
+      const albumId = $('#ob-album').value;
+      S = {
+        name,
+        city: $('#ob-city').value,
+        email,
+        phone,
+        phoneCountry: country.code,
+        albumId,
+        sticks:{},   // num -> {h:bool, r:int}
+        meets:[],
+        filter:'all',
+        lastPackTime: 0,
+        packsOpened: 0
+      };
+      save();
+      showApp();
+    };
+
+    function album(){ return ALBUMS.find(a=>a.id===S.albumId) || ALBUMS[0]; }
+
+    function showApp(){
+      $('#onboarding').classList.add('hidden');
+      $('#main').classList.remove('hidden');
+      $('#nav').classList.remove('hidden');
+      const a = album();
+      $('#album-sub').textContent = `${a.emoji} ${a.name}`;
+      $('#who-name').textContent = S.name;
+      $('#who-city').textContent = '📍 ' + S.city;
+      $('#trade-city').textContent = S.city;
+      $('#pf-name').value = S.name;
+      $('#pf-city').value = S.city;
+      
+      // Setup active chip in filters
+      $$('.filter-chip').forEach(ch => {
+        ch.classList.toggle('active', ch.dataset.filter === S.filter);
+      });
+      
+      renderAll();
+      startCooldownTimer();
+    }
+
+    function renderAll(){
+      renderStats();
+      renderGrid();
+      renderMatches();
+      renderMeets();
+      renderNavBadge();
+      updatePackBanner();
+      updateSharePreview();
+    }
+
+    /* =================== Stats =================== */
+    function counts(){
+      const a=album(); let have=0, rep=0;
+      for(let i=1;i<=a.total;i++){ const s=S.sticks[i]; if(s&&s.h){ have++; if(s.r>0) rep+=s.r; } }
+      return {have, miss:a.total-have, rep, total:a.total};
+    }
+    
+    function renderStats(){
+      const c=counts();
+      $('#s-have').textContent=c.have;
+      $('#s-miss').textContent=c.miss;
+      $('#s-rep').textContent=c.rep;
+      const pct = Math.round(c.have/c.total*100);
+      $('#s-pct').textContent=pct+'%';
+      
+      // Update circular SVG gauge
+      const circumference = 238.76; // 2 * PI * r(38)
+      const offset = circumference - (pct / 100) * circumference;
+      $('#bar-ring').style.strokeDashoffset = offset;
+      
+      const msg=$('#complete-msg');
+      if(c.miss===0) msg.innerHTML='🎉 <b>Álbum completo!</b> Parabéns! Você é incrível!';
+      else msg.innerHTML=`Faltam <b style="color:var(--danger)">${c.miss}</b> figurinhas pra completar seu álbum.`;
+    }
+
+    /* =================== Grid =================== */
+    function renderGrid(){
+      const a=album(); const g=$('#grid'); const f=S.filter;
+      let html='';
+      for(let i=1;i<=a.total;i++){
+        const s=S.sticks[i]||{h:false,r:0};
+        if(f==='miss' && s.h) continue;
+        if(f==='have' && !s.h) continue;
+        if(f==='rep' && !(s.h&&s.r>0)) continue;
+        const cls = s.h ? (s.r>0?'cell rep':'cell have') : 'cell';
+        const badge = (s.h&&s.r>0)?`<span class="badge">+${s.r}</span>`:'';
+        html+=`<div class="${cls}" data-n="${i}">${i}${badge}</div>`;
+      }
+      g.innerHTML = html || '<p class="muted" style="grid-column:1/-1;text-align:center;padding:25px">Nenhuma figurinha com esse filtro.</p>';
+    }
+
+    /* Tap + Long-press handling (Improved) */
+    let pressTimer=null, longPressed=false;
+    
+    $('#grid').addEventListener('pointerdown', e=>{
+      const cell=e.target.closest('.cell'); if(!cell) return;
+      longPressed=false;
+      pressTimer=setTimeout(()=>{ 
+        longPressed=true; 
+        openCardDetailsModal(+cell.dataset.n); 
+      }, 350); // Slightly shorter duration for native response feel
+    });
+    
+    ['pointerup','pointerleave','pointercancel'].forEach(ev=>$('#grid').addEventListener(ev,()=>clearTimeout(pressTimer)));
+    
+    $('#grid').addEventListener('click', e=>{
+      const cell=e.target.closest('.cell'); if(!cell) return;
+      if(longPressed){ longPressed=false; return; }
+      cycle(+cell.dataset.n);
+    });
+
+    function cycle(n){
+      const s=S.sticks[n]||{h:false,r:0};
+      if(!s.h){ s.h=true; s.r=0; }            // miss -> have
+      else if(s.r===0){ s.r=1; }              // have -> repeated(1)
+      else { s.h=false; s.r=0; }              // repeated -> miss
+      S.sticks[n]=s; 
+      save(); 
+      renderStats(); 
+      renderGrid(); 
+      renderMatches(); 
+      renderNavBadge(); 
+      updateSharePreview();
+    }
+
+    /* =================== Card Details Drawer (Modal) =================== */
+    let detTarget = null;
+    let detState = { h: false, r: 0 };
+    
+    function openCardDetailsModal(n) {
+      detTarget = n;
+      const s = S.sticks[n] || { h: false, r: 0 };
+      detState = { ...s }; // Copy state
+      
+      const info = getStickerInfo(n, S.albumId);
+      const a = album();
+      
+      // Populate Card Detail Graphic
+      $('#det-card-num').textContent = n;
+      $('#det-card-name').textContent = info.name;
+      $('#det-card-rarity').textContent = info.rarityText.toUpperCase();
+      $('#det-card-symbol').textContent = a.emoji;
+      $('#det-card-album').textContent = a.name;
+      
+      const preview = $('#det-card-preview');
+      preview.style.background = info.color;
+      
+      if (info.rarity === 'Lendário') {
+        preview.style.borderColor = 'rgba(255, 210, 63, 0.6)';
+        preview.style.boxShadow = '0 10px 30px rgba(255, 210, 63, 0.25)';
+      } else if (info.rarity === 'Raro') {
+        preview.style.borderColor = 'rgba(167, 139, 250, 0.6)';
+        preview.style.boxShadow = '0 10px 30px rgba(139, 92, 246, 0.25)';
+      } else {
+        preview.style.borderColor = 'rgba(255,255,255,0.25)';
+        preview.style.boxShadow = '0 10px 25px rgba(0,0,0,0.4)';
+      }
+      
+      // Control texts
+      $('#det-card-title-text').textContent = `Figurinha #${n}`;
+      $('#det-card-rarity-desc').innerHTML = `Tipo: <span style="color:${info.rarity==='Lendário'?'var(--primary)':info.rarity==='Raro'?'var(--repeated)':'var(--cyan)'}">${info.rarityText}</span>`;
+      
+      updateDrawerUI();
+      openModal('#card-details-modal');
+    }
+    
+    function updateDrawerUI() {
+      // Toggle have / miss states
+      $('#det-toggle-have').classList.toggle('active', detState.h);
+      $('#det-toggle-miss').classList.toggle('active', !detState.h);
+      
+      // Show/hide duplicates controls
+      if (detState.h) {
+        $('#det-repeated-section').classList.remove('hidden');
+        $('#det-rep-count').textContent = detState.r;
+      } else {
+        $('#det-repeated-section').classList.add('hidden');
+      }
+      
+      // Query contextual matches for this sticker
+      const n = detTarget;
+      const listContainer = $('#det-trade-list');
+      listContainer.innerHTML = '';
+      
+      if (!detState.h) { // I need this sticker
+        const givers = computeMatches().filter(m => m.iGet.includes(n));
+        if (givers.length > 0) {
+          listContainer.innerHTML = givers.map(g => 
+            `<div class="trade-context-item">🟢 Receba de <b>${g.name}</b> (${g.dist} km)</div>`
+          ).join('');
+        } else {
+          listContainer.innerHTML = '<div class="muted">Ninguém tem esta repetida perto de você no momento.</div>';
+        }
+      } else if (detState.r > 0) { // I have repeats
+        const receivers = computeMatches().filter(m => m.iGive.includes(n));
+        if (receivers.length > 0) {
+          listContainer.innerHTML = receivers.map(r => 
+            `<div class="trade-context-item">🟣 Ofereça para <b>${r.name}</b> (${r.dist} km)</div>`
+          ).join('');
+        } else {
+          listContainer.innerHTML = '<div class="muted">Ninguém precisa desta repetida na sua cidade agora.</div>';
+        }
+      } else {
+        listContainer.innerHTML = '<div class="muted">Você possui esta figurinha no seu álbum. Adicione repetidas para negociar!</div>';
+      }
+    }
+    
+    // Toggle actions inside drawer
+    $('#det-toggle-have').onclick = () => {
+      detState.h = true;
+      updateDrawerUI();
+    };
+    $('#det-toggle-miss').onclick = () => {
+      detState.h = false;
+      detState.r = 0;
+      updateDrawerUI();
+    };
+    
+    // Stepper actions
+    $('#det-step-dec').onclick = () => {
+      if (detState.r > 0) {
+        detState.r--;
+        updateDrawerUI();
+      }
+    };
+    $('#det-step-inc').onclick = () => {
+      detState.r++;
+      updateDrawerUI();
+    };
+    
+    // Close and save detailed card state
+    $('#det-close-btn').onclick = () => {
+      S.sticks[detTarget] = detState;
+      save();
+      renderAll();
+      closeModal('#card-details-modal');
+      toast(`Figurinha ${detTarget} atualizada ✓`);
+    };
+
+    /* =================== Search / Jumps =================== */
+    $('#search').addEventListener('input', e=>{
+      const n=parseInt(e.target.value,10);
+      if(!n) return;
+      S.filter='all';
+      
+      // Update Filter active state
+      $$('.filter-chip').forEach(ch => {
+        ch.classList.toggle('active', ch.dataset.filter === 'all');
+      });
+      
+      renderGrid();
+      
+      const cell=$(`.cell[data-n="${n}"]`);
+      if(cell){ 
+        cell.scrollIntoView({behavior:'smooth',block:'center'}); 
+        cell.style.outline='3px solid var(--primary)'; 
+        cell.style.transform='scale(1.1)';
+        setTimeout(()=>{
+          cell.style.outline='';
+          cell.style.transform='';
+        },1400); 
+      }
+    });
+
+    /* =================== Filter Chips (Horizontal slider navigation) =================== */
+    $('.filter-scroll-container').addEventListener('click', e => {
+      const chip = e.target.closest('.filter-chip');
+      if(!chip) return;
+      
+      $$('.filter-chip').forEach(ch => ch.classList.remove('active'));
+      chip.classList.add('active');
+      
+      S.filter = chip.dataset.filter;
+      save();
+      renderGrid();
+    });
+
+    /* =================== Neighbors Generator (Mock Matches) =================== */
+    function genNeighbors(){
+      const a=album();
+      const seed = hashStr(S.city+'|'+S.albumId);
+      const rnd = mulberry(seed);
+      const n = 5 + Math.floor(rnd()*4); // 5-8 people
+      const list=[];
+      const usedNames = new Set();
+      for(let k=0;k<n;k++){
+        let name; do{ name=NAMES[Math.floor(rnd()*NAMES.length)]; }while(usedNames.has(name)&&usedNames.size<NAMES.length);
+        usedNames.add(name);
+        // each neighbor owns a random subset; duplicates a smaller subset
+        const have=new Set(), dup=new Set();
+        const ownRatio = 0.45 + rnd()*0.45; // 45%-90% complete
+        for(let i=1;i<=a.total;i++){
+          if(rnd()<ownRatio){ have.add(i); if(rnd()<0.18) dup.add(i); }
+        }
+        list.push({id:k, name, color:AVA_COLORS[k%AVA_COLORS.length], have, dup,
+          pts: Math.floor(rnd()*100)+12, dist:(rnd()*9+0.4).toFixed(1)});
+      }
+      return list;
+    }
+
+    /* my missing & my dups */
+    function mySets(){
+      const a=album(); const miss=new Set(), dup=new Set();
+      for(let i=1;i<=a.total;i++){ const s=S.sticks[i]; if(!s||!s.h) miss.add(i); else if(s.r>0) dup.add(i); }
+      return {miss,dup};
+    }
+
+    function computeMatches(){
+      const me=mySets();
+      const nb=genNeighbors();
+      const res=[];
+      for(const p of nb){
+        // they give me: their dups ∩ my missing
+        const iGet=[...p.dup].filter(x=>me.miss.has(x)).sort((a,b)=>a-b);
+        // I give them: my dups ∩ their missing
+        const iGive=[...me.dup].filter(x=>!p.have.has(x)).sort((a,b)=>a-b);
+        const score=iGet.length+iGive.length;
+        if(score>0) res.push({...p, iGet, iGive, score});
+      }
+      res.sort((a,b)=>b.score-a.score);
+      return res;
+    }
+
+    /* =================== Matches UI =================== */
+    function renderMatches(){
+      const wrap=$('#matches');
+      const me=mySets();
+      if(me.dup.size===0 && me.miss.size===album().total){
+        wrap.innerHTML=`<div class="empty"><div class="big">📒</div><b>Marque seu álbum primeiro</b><p class="muted" style="margin-top:6px">Marque as figurinhas que você tem e as repetidas para encontrar trocas na região.</p></div>`;
+        return;
+      }
+      const m=computeMatches();
+      if(!m.length){
+        wrap.innerHTML=`<div class="empty"><div class="big">🔍</div><b>Nenhuma troca ainda</b><p class="muted" style="margin-top:6px">Abra pacotinhos ou adicione mais repetidas (clicando e segurando na figurinha) para calcular trocas em ${S.city}.</p></div>`;
+        return;
+      }
+      wrap.innerHTML = m.map((p,i)=>matchCard(p,i===0)).join('');
+      $$('#matches .match .btn').forEach(b=>{
+        b.onclick=()=>openTradeModal(+b.dataset.id);
+      });
+    }
+    
+    function numList(arr,cls){
+      const show=arr.slice(0,10);
+      const extra=arr.length-show.length;
+      return `<div class="nums">${show.map(n=>`<span class="num ${cls}">${n}</span>`).join('')}${extra>0?`<span class="more">+${extra}</span>`:''}</div>`;
+    }
+    
+    function matchCard(p,top){
+      return `<div class="match ${top?'top':''}">
+        <div class="mhead">
+          <div class="ava" style="background:${p.color}">${p.name[0]}</div>
+          <div>
+            <div class="nm">${p.name}</div>
+            <div class="meta">📍 ${p.dist} km • ⭐ ${p.pts} trocas concluídas</div>
+          </div>
+          <div class="score"><div class="n">${p.score}</div><div class="l">trocas</div></div>
+        </div>
+        <div class="swap">
+          <div class="swapbox">
+            <div class="t in">⬇️ Você recebe (${p.iGet.length})</div>
+            ${p.iGet.length?numList(p.iGet,'in'):'<span class="more">nada no momento</span>'}
+          </div>
+          <div class="swapbox">
+            <div class="t out">⬆️ Você entrega (${p.iGive.length})</div>
+            ${p.iGive.length?numList(p.iGive,'out'):'<span class="more">nada no momento</span>'}
+          </div>
+        </div>
+        <div style="height:12px"></div>
+        <button class="btn" data-id="${p.id}">🤝 Combinar Troca com ${p.name}</button>
+      </div>`;
+    }
+
+    /* =================== Trade Modal & Mapping System =================== */
+    let tmState={id:null,point:null,day:null,time:null};
+    
+    function openTradeModal(id){
+      const m=computeMatches().find(x=>x.id===id);
+      if(!m) return;
+      tmState={id, name:m.name, score:m.score, iGet:m.iGet, iGive:m.iGive, point:null,day:null,time:null};
+      $('#tm-name').textContent=m.name;
+      
+      const pts=POINTS.default;
+      $('#tm-points').innerHTML=pts.map((p,i)=>`<div class="opt" data-p="${i}"><div class="ic">${p.ic}</div><div><div class="nm">${p.nm}</div><div class="ds">${p.ds}</div></div><div class="ck">✓</div></div>`).join('');
+      $('#tm-days').innerHTML=DAYS.map(d=>`<div class="chip" data-d="${d}">${d}</div>`).join('');
+      $('#tm-times').innerHTML=TIMES.map(t=>`<div class="chip" data-t="${t}">${t}</div>`).join('');
+      $('#tm-confirm').classList.remove('show');
+      $('#tm-go').textContent='Confirmar Encontro';
+      
+      // Reset map graphic
+      $('#gps-pin').style.transform = 'translate(-50%, -50%) scale(1)';
+      $('#gps-coords').textContent = 'S 00° 00\' 00" W 00° 00\' 00"';
+      $('#gps-loc-name').textContent = 'Selecione um ponto de encontro';
+
+      openModal('#trade-modal');
+    }
+    
+    $('#tm-points').addEventListener('click',e=>{
+      const o=e.target.closest('.opt'); if(!o) return;
+      $$('#tm-points .opt').forEach(x=>x.classList.remove('on')); 
+      o.classList.add('on');
+      
+      const ptIdx = +o.dataset.p;
+      const pt = POINTS.default[ptIdx];
+      tmState.point = pt.nm;
+      
+      // Update interactive GPS Map HUD
+      const geo = MAP_COORDS[ptIdx];
+      const pin = $('#gps-pin');
+      
+      $('#gps-coords').textContent = geo.coords;
+      $('#gps-loc-name').textContent = pt.nm;
+      
+      // Smooth visual coordinate displacement
+      pin.style.transform = `translate(calc(-50% + ${geo.x}px), calc(-50% + ${geo.y}px)) scale(1.25)`;
+    });
+    
+    $('#tm-days').addEventListener('click',e=>{ const c=e.target.closest('.chip'); if(!c)return; $$('#tm-days .chip').forEach(x=>x.classList.remove('on')); c.classList.add('on'); tmState.day=c.dataset.d; });
+    $('#tm-times').addEventListener('click',e=>{ const c=e.target.closest('.chip'); if(!c)return; $$('#tm-times .chip').forEach(x=>x.classList.remove('on')); c.classList.add('on'); tmState.time=c.dataset.t; });
+
+    $('#tm-go').onclick=()=>{
+      if(!tmState.point){ toast('Escolha um ponto de troca 📍'); return; }
+      if(!tmState.day){ toast('Escolha o dia 🗓️'); return; }
+      if(!tmState.time){ toast('Escolha o horário 🕐'); return; }
+      
+      const meet={
+        id:Date.now(), name:tmState.name, color:AVA_COLORS[tmState.id%AVA_COLORS.length],
+        point:tmState.point, day:tmState.day, time:tmState.time,
+        get:tmState.iGet.length, give:tmState.iGive.length, city:S.city
+      };
+      
+      S.meets.unshift(meet); save();
+      $('#tm-confirm-det').innerHTML=`Você vai trocar com <b>${meet.name}</b><br>📍 ${meet.point}<br>🕐 ${meet.day}, ${meet.time}<br>🔁 Recebe ${meet.get} • Dá ${meet.give}`;
+      $('#tm-confirm').classList.add('show');
+      $('#tm-go').textContent='Combinado! ✓';
+      renderMeets(); 
+      renderNavBadge();
+      
+      setTimeout(()=>{ 
+        closeModal('#trade-modal'); 
+        switchTab('meets'); 
+        toast('Troca marcada! 🎉'); 
+      }, 1500);
+    };
+    $('#tm-cancel').onclick=()=>closeModal('#trade-modal');
+
+    /* =================== Meets =================== */
+    function renderMeets(){
+      const w=$('#meets');
+      if(!S.meets.length){ w.innerHTML=`<div class="empty"><div class="big">📭</div><b>Nenhum encontro ainda</b><p class="muted" style="margin-top:6px">Combine trocas na aba 🔁 Trocas.</p></div>`; return; }
+      w.innerHTML=S.meets.map(m=>`<div class="match">
+        <div class="mhead">
+          <div class="ava" style="background:${m.color}">${m.name[0]}</div>
+          <div><div class="nm">${m.name}</div><div class="meta">🔁 Recebe ${m.get} • Dá ${m.give}</div></div>
+          <button class="btn ghost sm" data-cancel="${m.id}" style="margin-left:auto">Cancelar</button>
+        </div>
+        <div class="swap" style="grid-template-columns:1fr">
+          <div class="swapbox"><div class="t">📍 Ponto de encontro</div><div style="font-size:.9rem;font-weight:600">${m.point}</div></div>
+          <div class="swapbox"><div class="t">🕐 Dia & Horário</div><div style="font-size:.9rem;font-weight:600">${m.day}, ${m.time}</div></div>
+        </div>
+      </div>`).join('');
+      $$('#meets [data-cancel]').forEach(b=>b.onclick=()=>{
+        S.meets=S.meets.filter(x=>x.id!=b.dataset.cancel); save(); renderMeets(); renderNavBadge(); toast('Encontro cancelado');
+      });
+    }
+
+    /* =================== Nav =================== */
+    function renderNavBadge(){
+      const m=computeMatches();
+      const b=$('#nav-trade-badge');
+      b.className = m.length?'nbadge':''; b.textContent = m.length?m.length:'';
+    }
+    
+    $('#nav').addEventListener('click',e=>{ const btn=e.target.closest('button'); if(btn) switchTab(btn.dataset.tab); });
+    
+    function switchTab(t){
+      $$('#nav button').forEach(b=>b.classList.toggle('active', b.dataset.tab===t));
+      ['album','trade','meets','profile'].forEach(x=>{
+        const tabEl = $('#tab-'+x);
+        if(x===t){
+          tabEl.style.display = 'block';
+          setTimeout(()=>tabEl.classList.add('active'), 10);
+        } else {
+          tabEl.classList.remove('active');
+          tabEl.style.display = 'none';
+        }
+      });
+      if(t==='trade') renderMatches();
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    /* =================== Profile Actions & Exporter =================== */
+    $('#pf-save').onclick=()=>{
+      S.name=$('#pf-name').value.trim()||S.name;
+      S.city=$('#pf-city').value;
+      save(); 
+      showApp(); 
+      toast('Perfil atualizado com sucesso ✓');
+    };
+    
+    $('#demo-fill').onclick=()=>{
+      const a=album(); const rnd=mulberry(hashStr('demo'+S.name));
+      S.sticks={};
+      for(let i=1;i<=a.total;i++){
+        if(rnd()<0.7){ const r=rnd()<0.25?Math.ceil(rnd()*3):0; S.sticks[i]={h:true,r}; }
+      }
+      save(); renderAll(); switchTab('album'); toast('Álbum preenchido para testes! 🎲');
+    };
+    
+    $('#reset').onclick=()=>{
+      if(confirm('Apagar todas as figurinhas e configurações? Essa ação não pode ser desfeita.')){ 
+        localStorage.removeItem(LS); 
+        location.reload(); 
+      }
+    };
+
+    /* WhatsApp Text Generator Logic */
+    function getShareText() {
+      const a = album();
+      const me = mySets();
+      let missArr = Array.from(me.miss).sort((x,y)=>x-y);
+      let dupArr = Array.from(me.dup).sort((x,y)=>x-y);
+
+      function compressList(arr) {
+        if (!arr.length) return 'Nenhuma';
+        let res = [];
+        let start = arr[0];
+        let prev = arr[0];
+        for(let i=1; i<=arr.length; i++) {
+          if(i < arr.length && arr[i] === prev + 1) {
+            prev = arr[i];
+          } else {
+            if(start === prev) res.push(start);
+            else res.push(`${start}-${prev}`);
+            if(i < arr.length) {
+              start = arr[i];
+              prev = arr[i];
+            }
+          }
+        }
+        return res.join(', ');
+      }
+
+      const text = `📋 *MINHAS FIGURINHAS — FIGURA CERTA*
+👤 *Colecionador:* ${S.name}
+📍 *Cidade:* ${S.city}
+Álbum: ${a.emoji} ${a.name}
+
+❌ *PRECISO DAS FIGURINHAS (${missArr.length}):*
+${compressList(missArr)}
+
+🔁 *TENHO REPETIDAS PARA TROCAR (${dupArr.length}):*
+${compressList(dupArr)}
+
+_Facilite suas trocas pelo aplicativo Figura Certa!_ 🤝`;
+      return text;
+    }
+
+    function updateSharePreview() {
+      if(!S) return;
+      const preview = $('#share-preview');
+      if(preview) {
+        preview.textContent = getShareText();
+      }
+    }
+
+    $('#pf-share-wa').onclick = () => {
+      const text = getShareText();
+      navigator.clipboard.writeText(text).then(() => {
+        toast('Copiado para área de transferência! 🚀');
+        // Optional redirect for users
+        if(confirm('Lista copiada! Deseja abrir o WhatsApp Web para colar no seu grupo?')) {
+          window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+        }
+      }).catch(() => {
+        toast('Erro ao copiar dados');
+      });
+    };
+
+    /* =================== Card Pack Opening System (Premium addition) =================== */
+    const COOLDOWN_TIME = 2 * 60 * 60 * 1000; // 2 Hours
+    let cooldownInterval = null;
+    let currentPackCards = [];
+
+    function updatePackBanner() {
+      if (!S) return;
+      const btn = $('#btn-open-pack');
+      const skip = $('#btn-pack-skip-cooldown');
+      const now = Date.now();
+      const diff = now - (S.lastPackTime || 0);
+
+      if (diff >= COOLDOWN_TIME) {
+        btn.textContent = "Abrir Pacote Grátis! 🎁";
+        btn.disabled = false;
+        skip.classList.add('hidden');
+      } else {
+        const remaining = COOLDOWN_TIME - diff;
+        btn.textContent = `Aguarde: ${formatTime(remaining)}`;
+        btn.disabled = true;
+        skip.classList.remove('hidden');
+      }
+    }
+
+    function formatTime(ms) {
+      const hrs = Math.floor(ms / 3600000);
+      const mins = Math.floor((ms % 3600000) / 60000);
+      const secs = Math.floor((ms % 60000) / 1000);
+      return `${hrs.toString().padStart(2, '0')}h ${mins.toString().padStart(2, '0')}m ${secs.toString().padStart(2, '0')}s`;
+    }
+
+    function startCooldownTimer() {
+      clearInterval(cooldownInterval);
+      cooldownInterval = setInterval(() => {
+        updatePackBanner();
+      }, 1000);
+    }
+
+    // Skip cooldown button for demo/testing
+    $('#btn-pack-skip-cooldown').onclick = () => {
+      S.lastPackTime = 0;
+      save();
+      updatePackBanner();
+      toast('Cooldown zerado! Bons testes ⚡');
+    };
+
+    // Open pack trigger
+    $('#btn-open-pack').onclick = () => {
+      const a = album();
+      currentPackCards = [];
+      
+      // Select 5 random stickers
+      for (let i = 0; i < 5; i++) {
+        const num = Math.floor(Math.random() * a.total) + 1;
+        const info = getStickerInfo(num, S.albumId);
+        
+        // Check state in album *before* inserting
+        const userHas = S.sticks[num] && S.sticks[num].h;
+        
+        currentPackCards.push({
+          num,
+          info,
+          isNew: !userHas
+        });
+      }
+
+      // Open Pack Overlay Visuals
+      $('#pack-wrapper-logo').textContent = a.emoji;
+      $('#pack-overlay').classList.add('show');
+      $('#pack-wrapper-view').classList.remove('hidden');
+      $('#pack-reveal-view').classList.add('hidden');
+      $('#btn-pack-collect').classList.add('hidden');
+      $('#booster-pack').classList.remove('tearing');
+      document.body.classList.add('scrolllock');
+    };
+
+    // Rip open the pack on click
+    $('#booster-pack').onclick = () => {
+      $('#booster-pack').classList.add('tearing');
+      toast('Rasgando pacote... ⚡');
+      
+      setTimeout(() => {
+        $('#pack-wrapper-view').classList.add('hidden');
+        $('#pack-reveal-view').classList.remove('hidden');
+        renderPackCardsToReveal();
+      }, 700);
+    };
+
+    function renderPackCardsToReveal() {
+      const grid = $('#pack-cards-grid');
+      
+      grid.innerHTML = currentPackCards.map((card, idx) => {
+        const rStyle = card.info.rarity === 'Lendário' ? 'bg-lendario' : card.info.rarity === 'Raro' ? 'bg-raro' : 'bg-comum';
+        const stBadge = card.isNew ? '<span class="flip-state-badge state-nova">NOVA</span>' : '<span class="flip-state-badge state-rep">REPETIDA</span>';
+        
+        return `<div class="card-flip-container" data-idx="${idx}" id="pack-c-${idx}">
+          <div class="card-flip-inner">
+            <!-- Front (Face down) -->
+            <div class="card-flip-front">
+              <span style="font-size:1.1rem">${idx+1}</span>
+            </div>
+            <!-- Back (Revealed) -->
+            <div class="card-flip-back ${rStyle}">
+              <span class="flip-rarity">${card.info.rarityText.toUpperCase()}</span>
+              <span class="flip-num">${card.num}</span>
+              <span class="flip-name">${card.info.name}</span>
+              ${stBadge}
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+
+      let flippedCount = 0;
+      
+      // Bind reveal event listeners
+      $$('.card-flip-container').forEach(cardEl => {
+        cardEl.onclick = () => {
+          if (cardEl.classList.contains('flipped')) return;
+          cardEl.classList.add('flipped');
+          flippedCount++;
+          
+          if (flippedCount === 5) {
+            setTimeout(() => {
+              $('#btn-pack-collect').classList.remove('hidden');
+            }, 500);
+          }
+        };
+      });
+    }
+
+    // Collect pack and insert items
+    $('#btn-pack-collect').onclick = () => {
+      currentPackCards.forEach(card => {
+        const s = S.sticks[card.num] || { h: false, r: 0 };
+        if (!s.h) {
+          s.h = true;
+          s.r = 0;
+        } else {
+          s.r++;
+        }
+        S.sticks[card.num] = s;
+      });
+
+      S.lastPackTime = Date.now();
+      S.packsOpened++;
+      save();
+      
+      closeModal('#pack-overlay');
+      $('#pack-overlay').classList.remove('show');
+      
+      renderAll();
+      toast('Figurinhas adicionadas ao álbum! 📒');
+    };
+
+    /* =================== Modals helpers =================== */
+    function openModal(sel){ $(sel).classList.add('show'); document.body.classList.add('scrolllock'); }
+    function closeModal(sel){ $(sel).classList.remove('show'); document.body.classList.remove('scrolllock'); }
+    
+    // Close modal on background click
+    $$('.modal-bg').forEach(bg=>bg.addEventListener('click',e=>{ 
+      if(e.target===bg) {
+        closeModal('#'+bg.id);
+        // Special cleanup if closing details modal
+        if (bg.id === 'card-details-modal') {
+          S.sticks[detTarget] = detState;
+          save();
+          renderAll();
+        }
+      }
+    }));
+
+    /* =================== Toast =================== */
+    let toastT=null;
+    function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2200); }
+
+    /* go */
+    boot();
+  </script>
+</body>
+</html>
