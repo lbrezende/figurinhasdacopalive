@@ -127,12 +127,29 @@
     .hero-note { margin-top: 16px; color: var(--muted); font-size: 0.85rem; }
 
     /* floating sticker chips */
-    .floaties { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: -1; }
+    .floaties { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+    .hero .container { position: relative; z-index: 1; }
     .floaty {
       position: absolute; font-size: 2.2rem; opacity: 0.5;
       animation: bob 6s ease-in-out infinite;
     }
     @keyframes bob { 0%,100%{ transform: translateY(0) rotate(-6deg);} 50%{ transform: translateY(-16px) rotate(6deg);} }
+
+    /* soft rounded background shapes (cantos arredondados p/ girar suave) */
+    .bg-shape {
+      position: absolute; pointer-events: none;
+      opacity: 0.22; filter: blur(6px); will-change: transform;
+      animation: floatspin 20s ease-in-out infinite;
+    }
+    .bg-shape.s1 { width: 150px; height: 150px; border-radius: 34px; background: var(--primary-gradient); }
+    .bg-shape.s2 { width: 120px; height: 120px; border-radius: 50%;  background: var(--cyan-gradient); }
+    .bg-shape.s3 { width: 170px; height: 170px; border-radius: 40px; background: var(--repeated-gradient); }
+    .bg-shape.s4 { width: 140px; height: 96px;  border-radius: 60px; background: var(--success-gradient); }
+    @keyframes floatspin {
+      0%   { transform: translate(0, 0)     rotate(0deg); }
+      50%  { transform: translate(8px, -26px) rotate(9deg); }
+      100% { transform: translate(0, 0)     rotate(0deg); }
+    }
 
     /* ============ STATS BAR ============ */
     .stats {
@@ -321,10 +338,14 @@
   <!-- ============ HERO ============ -->
   <section class="hero">
     <div class="floaties">
-      <span class="floaty" style="left:8%; top:20%; animation-delay:0s">⭐</span>
-      <span class="floaty" style="left:88%; top:16%; animation-delay:1.2s">🏆</span>
-      <span class="floaty" style="left:14%; top:70%; animation-delay:.6s">🤝</span>
-      <span class="floaty" style="left:82%; top:66%; animation-delay:1.8s">📒</span>
+      <div class="bg-shape s1" style="left:5%;  top:26%; animation-delay:0s"></div>
+      <div class="bg-shape s2" style="left:85%; top:10%; animation-delay:-6s"></div>
+      <div class="bg-shape s3" style="left:73%; top:58%; animation-delay:-3s"></div>
+      <div class="bg-shape s4" style="left:11%; top:64%; animation-delay:-10s"></div>
+      <span class="floaty" style="left:11%; top:18%; animation-delay:0s">⭐</span>
+      <span class="floaty" style="left:90%; top:22%; animation-delay:1.2s">🏆</span>
+      <span class="floaty" style="left:18%; top:72%; animation-delay:.6s">🤝</span>
+      <span class="floaty" style="left:80%; top:70%; animation-delay:1.8s">📒</span>
     </div>
     <div class="container">
       <span class="pill">⚽ Álbum da Copa do Mundo 2026 e muito mais</span>
