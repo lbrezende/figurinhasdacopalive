@@ -1,0 +1,189 @@
+// Figura Certa — schema do banco (SaaS + domínio das figurinhas)
+// Prisma 6 (estável e compatível com Auth.js v5)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ----------------------------------------------------------------------------
+// SaaS / Billing
+// ----------------------------------------------------------------------------
+
+enum Plan {
+  FREE
+  TRIAL
+  PRO
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+
+  // Perfil do app
+  city         String?
+  phone        String? // campo único: DDI + número (ex: +5511999999999)
+  phoneCountry String? // código ISO do país (ex: BR)
+
+  // Stripe / assinatura
+  stripeCustomerId       String?   @unique @map("stripe_customer_id")
+  stripePriceId          String?   @map("stripe_price_id")
+  stripeSubscriptionId   String?   @unique @map("stripe_subscription_id")
+  stripeCurrentPeriodEnd DateTime? @map("stripe_current_period_end")
+  trialEndsAt            DateTime? @map("trial_ends_at")
+  plan                   Plan      @default(FREE)
+
+  accounts         Account[]
+  sessions         Session[]
+  collections      Collection[]
+  meetupsAsOwner   Meetup[]     @relation("MeetupOwner")
+  meetupsAsPartner Meetup[]     @relation("MeetupPartner")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ----------------------------------------------------------------------------
+// Auth.js v5 (NextAuth) — modelos padrão
+// ----------------------------------------------------------------------------
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ----------------------------------------------------------------------------
+// Domínio: figurinhas, álbuns, coleções e trocas
+// ----------------------------------------------------------------------------
+
+enum Rarity {
+  COMUM
+  RARO
+  LENDARIO
+}
+
+// Catálogo de álbuns (seedado): Copa, Brasileirão, etc.
+model Album {
+  id    String @id // 'copa', 'brasil', 'animais', 'herois', 'mini'
+  name  String
+  total Int
+  emoji String
+
+  stickers    Sticker[]
+  collections Collection[]
+}
+
+// Catálogo de figurinhas por álbum (seedado de forma determinística)
+model Sticker {
+  id      String @id @default(cuid())
+  albumId String
+  album   Album  @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  number  Int
+  name    String
+  rarity  Rarity @default(COMUM)
+
+  ownerships StickerOwnership[]
+
+  @@unique([albumId, number])
+  @@index([albumId])
+}
+
+// Coleção do usuário em um álbum (o "meu álbum")
+model Collection {
+  id      String @id @default(cuid())
+  userId  String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  albumId String
+  album   Album  @relation(fields: [albumId], references: [id])
+
+  // Pacote diário grátis
+  lastPackAt  DateTime?
+  packsOpened Int       @default(0)
+
+  ownerships StickerOwnership[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, albumId])
+  @@index([userId])
+}
+
+// Estado de cada figurinha na coleção: tem? quantas repetidas?
+model StickerOwnership {
+  id           String     @id @default(cuid())
+  collectionId String
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  stickerId    String
+  sticker      Sticker    @relation(fields: [stickerId], references: [id], onDelete: Cascade)
+  number       Int // denormalizado p/ queries de match rápidas
+  have         Boolean    @default(false)
+  repeated     Int        @default(0)
+
+  updatedAt DateTime @updatedAt
+
+  @@unique([collectionId, stickerId])
+  @@index([collectionId])
+  @@index([stickerId])
+}
+
+// Encontro/troca marcada entre dois colecionadores
+model Meetup {
+  id          String  @id @default(cuid())
+  ownerId     String
+  owner       User    @relation("MeetupOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  partnerId   String?
+  partner     User?   @relation("MeetupPartner", fields: [partnerId], references: [id])
+  partnerName String? // para matches "virtuais" (demo / sem conta ainda)
+
+  albumId String
+  city    String
+  point   String
+  day     String
+  time    String
+
+  giveNumbers Int[] // números que o dono leva
+  getNumbers  Int[] // números que o dono recebe
+
+  status    String   @default("scheduled") // scheduled | done | cancelled
+  createdAt DateTime @default(now())
+
+  @@index([ownerId])
+}
