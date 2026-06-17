@@ -11,6 +11,18 @@ Migrado de um site estático (preservado em `legacy/`) para Next.js.
 - Resend (lazy) — `lib/email.ts`
 - TanStack Query + Zod + shadcn/ui (utils em `lib/utils.ts`) + Sonner (toasts)
 
+## Design System (estilo Airbnb)
+Baseado em `airbnb/DESIGN.md` (voltagent/awesome-design-md). Tokens em `app/globals.css` (`@theme`).
+- **Tema claro, sem dark mode.** Canvas branco; tinta `#222` (`text-ink`); nunca preto puro.
+- **Use os tokens semânticos**, não hex literais nem `white/10`: `bg-canvas` `bg-surface-soft` `bg-surface-strong` · `text-ink` `text-body` `text-muted` `text-muted-soft` · `border-hairline` `border-hairline-soft`.
+- **Voltage único = Rausch** (`bg-primary` `#ff385c`, hover `bg-primary-active`, disabled `bg-primary-disabled`, tint `bg-primary-soft`, texto `text-on-primary`). Usar com parcimônia: só CTAs primários, orb de busca, marcador ativo do mapa, nav ativa. **Sem gradientes.**
+- **Raios:** botões `rounded-lg` (8px) · cards `rounded-2xl` · pílulas/chips/search `rounded-full`.
+- **Elevação:** um único tier — `shadow-[var(--shadow-airbnb)]` (e `--shadow-airbnb-lg` p/ modais). 95% das superfícies são flat com `border-hairline`.
+- **Toggles/seleção** (filtros, dia/hora): ativo = `bg-ink text-white`; inativo = `bg-surface-soft text-body`. Estados de coleção: tenho=emerald-500, falta=surface-soft, repetida=violet-500.
+- **Scrim de modal:** `bg-black/50`. **Inputs:** `border-hairline` + `focus:border-ink` (sem ring/glow).
+- **Fonte:** Inter (substituto open-source do Cereal VF) — `app/layout.tsx`. Pesos display modestos (500–700).
+- Exceção: `app/modelodedados` é uma viz 3D WebGL deliberadamente escura (acento Rausch).
+
 ## Convenções
 - Env vars do Auth.js v5 usam prefixo `AUTH_` (`AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`).
 - **Nunca importar Auth.js no `proxy.ts`** (estoura 1MB de Edge Function). A proteção de rota checa o cookie `authjs.session-token` diretamente.

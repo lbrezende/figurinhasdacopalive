@@ -4,8 +4,22 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { signOut } from "next-auth/react";
 import { toast } from "sonner";
 import { CITIES, TRADE_POINTS, DAYS, TIMES } from "@/lib/cities";
+import { TEAM_ORDER, teamStyle, idealText, darken, fakePhoto } from "@/lib/teams";
 
-type Cell = { number: number; name: string; rarity: "COMUM" | "RARO" | "LENDARIO"; have: boolean; repeated: number };
+type Kind = "SPECIAL" | "BADGE" | "PHOTO" | "PLAYER" | null;
+type Cell = {
+  number: number;
+  name: string;
+  rarity: "COMUM" | "RARO" | "LENDARIO";
+  have: boolean;
+  repeated: number;
+  code: string | null;
+  teamCode: string | null;
+  teamName: string | null;
+  kind: Kind;
+  displayNo: number | null;
+  verified: boolean;
+};
 type Counts = { have: number; miss: number; rep: number; total: number; pct: number };
 type Album = { id: string; name: string; emoji: string; total: number };
 type UserT = { name: string | null; email: string | null; city: string | null; plan: string; trialEndsAt: string | null };
@@ -100,22 +114,56 @@ export function AppClient({
     if (!longPressed.current) cycle(c);
   }
 
-  /* ---------- busca ---------- */
-  const [search, setSearch] = useState("");
-  const gridRef = useRef<HTMLDivElement>(null);
-  function jumpTo(n: number) {
-    const el = gridRef.current?.querySelector(`[data-num="${n}"]`);
-    el?.scrollIntoView({ behavior: "smooth", block: "center" });
-    (el as HTMLElement)?.classList.add("ring-2", "ring-primary");
-    setTimeout(() => (el as HTMLElement)?.classList.remove("ring-2", "ring-primary"), 1600);
-  }
+  /* ---------- catálogo por seleção ---------- */
+  const isCatalog = useMemo(() => grid.some((c) => c.teamCode), [grid]);
+  const teamsPresent = useMemo(() => {
+    const set = new Set(grid.map((c) => c.teamCode ?? "FWC"));
+    return TEAM_ORDER.filter((t) => set.has(t));
+  }, [grid]);
+  const [team, setTeam] = useState<string>(
+    () => initialGrid.find((c) => c.teamCode && c.teamCode !== "FWC")?.teamCode ?? "FWC"
+  );
 
-  const visible = grid.filter((c) => {
+  function matchFilter(c: Cell) {
     if (filter === "miss") return !c.have;
     if (filter === "have") return c.have;
     if (filter === "rep") return c.repeated > 0;
     return true;
-  });
+  }
+
+  const teamAll = useMemo(
+    () => grid.filter((c) => (c.teamCode ?? "FWC") === team).sort((a, b) => a.number - b.number),
+    [grid, team]
+  );
+  const teamHave = teamAll.filter((c) => c.have).length;
+  const teamCells = teamAll.filter(matchFilter);
+  const visible = grid.filter(matchFilter); // grid simples (álbuns gerados sem seleção)
+
+  /* ---------- busca ---------- */
+  const [search, setSearch] = useState("");
+  const gridRef = useRef<HTMLDivElement>(null);
+  function highlight(n: number) {
+    const el = gridRef.current?.querySelector(`[data-num="${n}"]`);
+    el?.scrollIntoView({ behavior: "smooth", block: "center" });
+    (el as HTMLElement)?.classList.add("ring-4", "ring-amber-300");
+    setTimeout(() => (el as HTMLElement)?.classList.remove("ring-4", "ring-amber-300"), 1600);
+  }
+  function jumpTo(n: number) {
+    if (!isCatalog) { highlight(n); return; }
+    if (teamAll.some((c) => c.displayNo === n)) { highlight(n); return; }
+    const other = grid.find((c) => c.displayNo === n && c.teamCode);
+    if (other?.teamCode) {
+      setTeam(other.teamCode);
+      setFilter("all");
+      setTimeout(() => highlight(n), 80);
+    }
+  }
+  function stepTeam(dir: number) {
+    const i = teamsPresent.indexOf(team);
+    const next = (i + dir + teamsPresent.length) % teamsPresent.length;
+    setTeam(teamsPresent[next]);
+    setFilter("all");
+  }
 
   /* ---------- trocas ---------- */
   const [matches, setMatches] = useState<Match[] | null>(null);
@@ -227,7 +275,7 @@ export function AppClient({
                 <span>🔎</span>
                 <input value={search} onChange={(e) => setSearch(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter" && search) jumpTo(Number(search)); }}
-                  inputMode="numeric" placeholder="Ir para o número… (Enter)" className="w-full bg-transparent text-sm text-ink outline-none placeholder:text-muted-soft" />
+                  inputMode="numeric" placeholder={isCatalog ? "Ir para o nº do jogador… (Enter)" : "Ir para o número… (Enter)"} className="w-full bg-transparent text-sm text-ink outline-none placeholder:text-muted-soft" />
               </div>
               <div className="mt-3 flex gap-2">
                 {(["all", "miss", "have", "rep"] as const).map((f) => (
@@ -237,29 +285,95 @@ export function AppClient({
                   </button>
                 ))}
               </div>
-              <div className="mt-3 flex gap-4 text-xs text-muted">
-                <span className="flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-full bg-surface-strong" /> Falta</span>
-                <span className="flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-full bg-emerald-500" /> Tenho</span>
-                <span className="flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-full bg-violet-500" /> Repetida</span>
-              </div>
 
-              <div ref={gridRef} className="mt-4 grid grid-cols-6 gap-1.5 sm:grid-cols-8">
-                {visible.map((c) => {
-                  const st = cellState(c);
-                  return (
-                    <button key={c.number} data-num={c.number}
-                      onPointerDown={() => onCellDown(c)} onPointerUp={() => onCellUp(c)} onPointerLeave={() => pressTimer.current && clearTimeout(pressTimer.current)}
-                      onContextMenu={(e) => { e.preventDefault(); setDetail(c); }}
-                      className={`relative aspect-square rounded-md text-xs font-bold transition ${st === "rep" ? "bg-violet-500 text-white" : st === "have" ? "bg-emerald-500 text-white" : "bg-surface-soft text-muted-soft"}`}>
-                      {c.number}
-                      {c.rarity === "LENDARIO" && <span className="absolute -right-0.5 -top-0.5 text-[8px]">⭐</span>}
-                      {c.repeated > 1 && <span className="absolute bottom-0 right-0.5 text-[8px]">×{c.repeated}</span>}
-                    </button>
-                  );
-                })}
-              </div>
-              <p className="mt-3 text-center text-xs text-muted">Toque: Falta ⇄ Tenho ⇄ Repetida · Segure: detalhes</p>
+              {isCatalog ? (
+                /* navegação de seleções */
+                <div className="mt-4 -mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1">
+                  {teamsPresent.map((tc) => {
+                    const ts = teamStyle(tc);
+                    const active = tc === team;
+                    return (
+                      <button key={tc} onClick={() => { setTeam(tc); setFilter("all"); }}
+                        className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-bold transition ${active ? "border-ink bg-ink text-white" : "border-hairline bg-surface-soft text-body hover:bg-surface-strong"}`}>
+                        <span className="text-sm">{ts.flag}</span>{tc === "FWC" ? "★" : tc}
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <>
+                  <div className="mt-3 flex gap-4 text-xs text-muted">
+                    <span className="flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-full bg-surface-strong" /> Falta</span>
+                    <span className="flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-full bg-emerald-500" /> Tenho</span>
+                    <span className="flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-full bg-violet-500" /> Repetida</span>
+                  </div>
+                  <div ref={gridRef} className="mt-4 grid grid-cols-6 gap-1.5 sm:grid-cols-8">
+                    {visible.map((c) => {
+                      const st = cellState(c);
+                      return (
+                        <button key={c.number} data-num={c.number}
+                          onPointerDown={() => onCellDown(c)} onPointerUp={() => onCellUp(c)} onPointerLeave={() => pressTimer.current && clearTimeout(pressTimer.current)}
+                          onContextMenu={(e) => { e.preventDefault(); setDetail(c); }}
+                          className={`relative aspect-square rounded-md text-xs font-bold transition ${st === "rep" ? "bg-violet-500 text-white" : st === "have" ? "bg-emerald-500 text-white" : "bg-surface-soft text-muted-soft"}`}>
+                          {c.number}
+                          {c.rarity === "LENDARIO" && <span className="absolute -right-0.5 -top-0.5 text-[8px]">⭐</span>}
+                          {c.repeated > 1 && <span className="absolute bottom-0 right-0.5 text-[8px]">×{c.repeated}</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="mt-3 text-center text-xs text-muted">Toque: Falta ⇄ Tenho ⇄ Repetida · Segure: detalhes</p>
+                </>
+              )}
             </div>
+
+            {/* ===== STAGE DA SELEÇÃO (estilo WE ARE) ===== */}
+            {isCatalog && (() => {
+              const ts = teamStyle(team);
+              const [p] = ts.colors;
+              const onP = idealText(p);
+              const title = team === "FWC" ? "Especiais" : (teamAll[0]?.teamName ?? ts.name);
+              return (
+                <section className="overflow-hidden rounded-3xl border border-hairline shadow-[var(--shadow-airbnb)]">
+                  {/* cabeçalho com fundo poligonal */}
+                  <div className="relative px-5 pt-6 pb-5" style={{ background: `linear-gradient(135deg, ${p}, ${darken(p, 0.45)})` }}>
+                    <TeamBackdrop colors={ts.colors} />
+                    <div className="relative flex items-start justify-between gap-3">
+                      <div style={{ color: onP }}>
+                        <div className="text-[11px] font-black uppercase tracking-[0.25em] opacity-80">We are</div>
+                        <h2 className="text-3xl font-black uppercase leading-[0.95] tracking-tight sm:text-4xl">{title}</h2>
+                        <div className="mt-2 text-[11px] font-semibold opacity-85">{ts.flag} {team === "FWC" ? "Figurinhas do torneio" : `Seleção • ${team}`}</div>
+                      </div>
+                      <div className="shrink-0 rounded-2xl bg-white px-3 py-2 text-center shadow-lg">
+                        <div className="text-2xl font-black leading-none text-ink">{teamHave}<span className="text-sm text-muted">/{teamAll.length}</span></div>
+                        <div className="mt-0.5 text-[9px] font-black uppercase tracking-wider text-primary">coladas</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* grade de cards */}
+                  <div ref={gridRef} className="grid grid-cols-3 gap-2.5 bg-canvas p-4 sm:grid-cols-4">
+                    {teamCells.map((c) => (
+                      <StickerCard key={c.number} cell={c} colors={ts.colors}
+                        onDown={() => onCellDown(c)} onUp={() => onCellUp(c)}
+                        onCancel={() => pressTimer.current && clearTimeout(pressTimer.current)}
+                        onDetail={() => setDetail(c)} />
+                    ))}
+                    {teamCells.length === 0 && (
+                      <p className="col-span-full py-10 text-center text-sm text-muted">Nenhuma figurinha com esse filtro.</p>
+                    )}
+                  </div>
+
+                  {/* navegação ◀ país ▶ */}
+                  <div className="flex items-center justify-between gap-3 border-t border-hairline bg-canvas px-4 py-3">
+                    <button onClick={() => stepTeam(-1)} className="grid h-9 w-9 place-items-center rounded-full bg-ink text-lg font-bold text-white transition hover:bg-ink/80">‹</button>
+                    <div className="truncate text-sm font-black uppercase tracking-wide text-ink">{title}</div>
+                    <button onClick={() => stepTeam(1)} className="grid h-9 w-9 place-items-center rounded-full bg-ink text-lg font-bold text-white transition hover:bg-ink/80">›</button>
+                  </div>
+                  <p className="bg-canvas pb-3 text-center text-xs text-muted">Toque: Falta ⇄ Tenho ⇄ Repetida · Segure: detalhes</p>
+                </section>
+              );
+            })()}
           </div>
         )}
 
@@ -362,12 +476,46 @@ export function AppClient({
       {detail && (
         <Modal onClose={() => setDetail(null)}>
           <div className="text-center">
-            <div className={`mx-auto flex h-44 w-32 flex-col items-center justify-center rounded-2xl ${RARITY_CARD[detail.rarity]}`}>
-              <div className="text-xs font-bold opacity-80">{RARITY_LABEL[detail.rarity]}</div>
-              <div className="text-4xl font-bold">{detail.number}</div>
-              <div className="px-2 text-center text-sm font-bold">{detail.name}</div>
-            </div>
-            <h2 className="mt-4 text-xl font-bold text-ink">Figurinha #{detail.number}</h2>
+            {detail.teamCode ? (
+              (() => {
+                const ts = teamStyle(detail.teamCode);
+                const p = ts.colors[0];
+                const tag = detail.teamCode === "FWC" ? detail.code : `${detail.teamCode} ${detail.displayNo ?? detail.number}`;
+                return (
+                  <div className="mx-auto w-40 overflow-hidden rounded-2xl shadow-lg" style={{ background: detail.have ? p : "#d9dde3", padding: 4 }}>
+                    <div className="relative aspect-[3/4] overflow-hidden rounded-xl">
+                      {detail.kind === "PLAYER" ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={fakePhoto(detail.number)} alt={detail.name}
+                          className={`h-full w-full object-cover ${detail.have ? "" : "opacity-60 grayscale"}`} />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-5xl"
+                          style={{ background: `linear-gradient(135deg, ${p}, ${darken(p, 0.4)})` }}>
+                          {detail.kind === "SPECIAL" ? "🏆" : ts.flag}
+                        </div>
+                      )}
+                      {!detail.have && (
+                        <div className="absolute inset-0 grid place-items-center bg-black/35 text-3xl font-black text-white">
+                          {detail.displayNo ?? detail.number}
+                        </div>
+                      )}
+                    </div>
+                    <div className="px-1 py-1.5 text-center text-xs font-black" style={{ color: detail.have ? idealText(p) : "#6a6a6a" }}>{tag}</div>
+                  </div>
+                );
+              })()
+            ) : (
+              <div className={`mx-auto flex h-44 w-32 flex-col items-center justify-center rounded-2xl ${RARITY_CARD[detail.rarity]}`}>
+                <div className="text-xs font-bold opacity-80">{RARITY_LABEL[detail.rarity]}</div>
+                <div className="text-4xl font-bold">{detail.number}</div>
+                <div className="px-2 text-center text-sm font-bold">{detail.name}</div>
+              </div>
+            )}
+            <h2 className="mt-4 text-xl font-bold text-ink">{detail.name}</h2>
+            <p className="mt-0.5 text-xs text-muted">
+              {detail.teamName ? `${detail.teamName} • ${detail.code}` : `Figurinha #${detail.number}`}
+              {!detail.verified && " • nome fictício"}
+            </p>
           </div>
           <div className="mt-4">
             <label className="text-sm font-semibold text-ink">Estado</label>
@@ -420,6 +568,77 @@ function Stat({ n, l, c }: { n: number; l: string; c: string }) {
       <div className={`text-xl font-bold ${c}`}>{n}</div>
       <div className="text-[10px] text-muted">{l}</div>
     </div>
+  );
+}
+
+/** Fundo poligonal nas cores da seleção (estilo das artes "WE ARE"). */
+function TeamBackdrop({ colors }: { colors: [string, string, string] }) {
+  const [, s, a] = colors;
+  return (
+    <svg className="pointer-events-none absolute inset-0 h-full w-full" preserveAspectRatio="none" viewBox="0 0 400 200" aria-hidden>
+      <polygon points="0,200 170,200 0,70" fill={s} opacity="0.22" />
+      <polygon points="400,0 400,130 250,0" fill={a} opacity="0.30" />
+      <polygon points="400,200 210,200 400,85" fill={a} opacity="0.16" />
+      <polygon points="110,0 250,0 150,95" fill={s} opacity="0.12" />
+    </svg>
+  );
+}
+
+/** Card de figurinha estilo Panini: escudo, seleção, especial ou jogador (com foto fictícia). */
+function StickerCard({
+  cell, colors, onDown, onUp, onCancel, onDetail,
+}: {
+  cell: Cell;
+  colors: [string, string, string];
+  onDown: () => void; onUp: () => void; onCancel: () => void; onDetail: () => void;
+}) {
+  const p = colors[0];
+  const have = cell.have;
+  const rep = cell.repeated > 0;
+  const no = cell.displayNo ?? cell.number;
+  const isPhotoCard = cell.kind === "PLAYER";
+  const frame = have ? p : "#d9dde3";
+  const labelBg = have ? p : "#eef0f3";
+  const labelText = have ? idealText(p) : "#5a5a5a";
+  const tag = cell.teamCode === "FWC" ? cell.code ?? "★" : `${cell.teamCode} ${no}`;
+  const crestLabel = cell.kind === "BADGE" ? "Escudo" : cell.kind === "PHOTO" ? "Seleção" : "Especial";
+
+  return (
+    <button
+      data-num={no}
+      onPointerDown={onDown} onPointerUp={onUp} onPointerLeave={onCancel}
+      onContextMenu={(e) => { e.preventDefault(); onDetail(); }}
+      className="relative flex flex-col overflow-hidden rounded-xl text-left shadow-sm transition active:scale-[0.97]"
+      style={{ background: frame, padding: 3 }}
+    >
+      <span className="absolute left-1.5 top-1.5 z-10 rounded-md bg-white/90 px-1.5 py-0.5 text-[9px] font-black tracking-wide text-ink">{tag}</span>
+      {rep ? (
+        <span className="absolute right-1.5 top-1.5 z-10 rounded-md bg-rose-500 px-1.5 py-0.5 text-[9px] font-black text-white">×REP</span>
+      ) : have ? (
+        <span className="absolute right-1.5 top-1.5 z-10 grid h-5 w-5 place-items-center rounded-md bg-emerald-500 text-[11px] font-black text-white">✓</span>
+      ) : null}
+
+      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-lg">
+        {isPhotoCard ? (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={fakePhoto(cell.number)} alt={cell.name} loading="lazy"
+              className={`h-full w-full object-cover transition ${have ? "" : "opacity-60 grayscale"}`} />
+            {!have && (
+              <span className="absolute inset-0 grid place-items-center bg-black/30 text-3xl font-black text-white/90">{no}</span>
+            )}
+          </>
+        ) : (
+          <div className="flex h-full w-full flex-col items-center justify-center"
+            style={{ background: have ? `linear-gradient(135deg, ${p}, ${darken(p, 0.4)})` : "#f2f3f5" }}>
+            <span className="text-4xl leading-none">{cell.kind === "SPECIAL" ? "🏆" : cell.kind === "PHOTO" ? "📸" : teamStyle(cell.teamCode).flag}</span>
+            <span className="mt-1.5 text-[10px] font-black uppercase tracking-widest" style={{ color: have ? idealText(p) : "#9aa0a8" }}>{crestLabel}</span>
+          </div>
+        )}
+      </div>
+
+      <div className="truncate px-1.5 py-1 text-center text-[10px] font-bold" style={{ background: labelBg, color: labelText }}>{cell.name}</div>
+    </button>
   );
 }
 
