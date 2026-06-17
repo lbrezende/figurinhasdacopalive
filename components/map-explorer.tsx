@@ -5,7 +5,7 @@ import L from "leaflet";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { MapContainer, TileLayer, Marker, ZoomControl, useMap } from "react-leaflet";
-import { TRADE_POINTS, type TradePoint } from "@/lib/map-points";
+import { TRADE_POINTS, traderInitials, type TradePoint } from "@/lib/map-points";
 
 const POPULAR = [7, 9, 10, 18, 22, 27, 30, 100];
 
@@ -37,7 +37,7 @@ function FlyTo({ center }: { center: [number, number] | null }) {
   return null;
 }
 
-export default function MapExplorer() {
+export default function MapExplorer({ isLoggedIn = false, userName }: { isLoggedIn?: boolean; userName?: string | null }) {
   const [wanted, setWanted] = useState<number[]>([]);
   const [customNum, setCustomNum] = useState("");
   const [address, setAddress] = useState("");
@@ -126,9 +126,15 @@ export default function MapExplorer() {
           </form>
           {/* Logo topo direito */}
           <div className="pointer-events-auto flex items-center gap-2">
-            <Link href="/login" className="hidden rounded-full border border-white/15 bg-[#070a13]/70 px-4 py-2 text-sm font-bold text-white backdrop-blur hover:bg-white/10 sm:block">
-              Entrar
-            </Link>
+            {isLoggedIn ? (
+              <Link href="/app" className="hidden rounded-full border border-[#ffd23f]/40 bg-[#ffd23f]/15 px-4 py-2 text-sm font-bold text-[#ffd23f] backdrop-blur hover:bg-[#ffd23f]/25 sm:block">
+                📒 Meu álbum{userName ? ` · ${userName.split(" ")[0]}` : ""}
+              </Link>
+            ) : (
+              <Link href="/login?callbackUrl=/" className="hidden rounded-full border border-white/15 bg-[#070a13]/70 px-4 py-2 text-sm font-bold text-white backdrop-blur hover:bg-white/10 sm:block">
+                Entrar
+              </Link>
+            )}
             <Link href="/" className="flex items-center gap-2 rounded-full bg-[#070a13]/70 px-3 py-2 font-display text-sm font-extrabold text-white backdrop-blur">
               <span className="grid h-7 w-7 place-items-center rounded-lg bg-gradient-to-br from-[#ffd23f] to-[#ff8a00] text-sm">⚽</span>
               <span className="hidden sm:block">Figura Certa</span>
@@ -178,14 +184,26 @@ export default function MapExplorer() {
             <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-400">
               👥 {selected.traders.length} colecionadores aqui
             </div>
-            <div className="mt-3 max-h-40 space-y-2 overflow-y-auto">
+            <div className="mt-3 max-h-44 space-y-2 overflow-y-auto">
               {selected.traders.map((tr) => (
                 <div key={tr.id} className="flex items-center gap-3 rounded-xl border border-white/10 bg-[#0a0f1e]/60 p-2.5">
                   <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-xs font-bold text-[#0d0903]" style={{ background: tr.color }}>
-                    {tr.initials.replace(/\W/g, "").slice(0, 2)}
+                    {traderInitials(tr)}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <span className="select-none rounded bg-white/10 px-2 py-0.5 text-xs blur-[3px]">Nome Sobrenome</span> <span className="text-xs">🔒</span>
+                    {isLoggedIn ? (
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="truncate text-sm font-semibold">{tr.name}</span>
+                        <a href={`https://wa.me/${tr.whatsapp}`} target="_blank" rel="noopener noreferrer"
+                          className="shrink-0 rounded-full bg-emerald-500/20 px-2.5 py-1 text-xs font-bold text-emerald-400 hover:bg-emerald-500/30">
+                          💬 WhatsApp
+                        </a>
+                      </div>
+                    ) : (
+                      <div>
+                        <span className="select-none rounded bg-white/10 px-2 py-0.5 text-xs blur-[3px]">Nome Sobrenome</span> <span className="text-xs">🔒</span>
+                      </div>
+                    )}
                     <div className="mt-1 truncate text-xs text-muted">
                       Oferece:{" "}
                       {tr.offers.map((o, i) => (
@@ -196,9 +214,15 @@ export default function MapExplorer() {
                 </div>
               ))}
             </div>
-            <Link href="/login?callbackUrl=/app" className="mt-4 block rounded-xl bg-gradient-to-br from-[#ffd23f] to-[#ff8a00] py-2.5 text-center font-display text-sm font-bold text-[#0d0903]">
-              🔒 Fazer login pra ver os contatos
-            </Link>
+            {isLoggedIn ? (
+              <Link href="/app" className="mt-4 block rounded-xl bg-gradient-to-br from-[#ffd23f] to-[#ff8a00] py-2.5 text-center font-display text-sm font-bold text-[#0d0903]">
+                📒 Abrir meu álbum e marcar troca
+              </Link>
+            ) : (
+              <Link href="/login?callbackUrl=/" className="mt-4 block rounded-xl bg-gradient-to-br from-[#ffd23f] to-[#ff8a00] py-2.5 text-center font-display text-sm font-bold text-[#0d0903]">
+                🔒 Fazer login pra ver os contatos
+              </Link>
+            )}
           </div>
         </div>
       )}

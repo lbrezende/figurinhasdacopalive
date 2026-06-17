@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { auth } from "@/lib/auth";
 import { MapExplorerSection } from "@/components/map-explorer-section";
 
 const FEATURES = [
@@ -16,11 +17,16 @@ const STEPS = [
   { n: "3", title: "Receba os matches", desc: "Veja quem perto de você fecha a troca e marque o encontro." },
 ];
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  const session = await auth();
+  const isLoggedIn = !!session?.user;
+
   return (
     <div className="flex min-h-screen flex-col">
       {/* Mapa de trocas em tela cheia (primeiro contato) */}
-      <MapExplorerSection />
+      <MapExplorerSection isLoggedIn={isLoggedIn} userName={session?.user?.name ?? null} />
 
       {/* Hero */}
       <section className="relative px-6 pt-20 pb-14 text-center">

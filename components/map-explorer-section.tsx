@@ -10,6 +10,6 @@ const MapExplorer = dynamic(() => import("./map-explorer"), {
   ),
 });
 
-export function MapExplorerSection() {
-  return <MapExplorer />;
+export function MapExplorerSection({ isLoggedIn, userName }: { isLoggedIn: boolean; userName?: string | null }) {
+  return <MapExplorer isLoggedIn={isLoggedIn} userName={userName} />;
 }

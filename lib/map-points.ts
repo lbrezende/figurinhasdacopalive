@@ -1,10 +1,11 @@
-// Pontos de troca (mock para o teaser público da home).
-// Coordenadas reais em São Paulo; os "traders" são anonimizados —
-// nome real e contato só aparecem depois do login.
+// Pontos de troca (mock para o teaser da home).
+// Coordenadas reais em São Paulo. Identidade/contato dos colecionadores
+// só são revelados quando o usuário está logado.
 
 export type Trader = {
   id: string;
-  initials: string; // ex: "M. S." — identidade real fica escondida
+  name: string; // revelado só após login
+  whatsapp: string; // só dígitos; revelado só após login
   color: string;
   offers: number[]; // figurinhas que essa pessoa tem para trocar
   wants: number; // quantas ela procura
@@ -21,8 +22,15 @@ export type TradePoint = {
 
 const C = ["#ffd23f", "#34d399", "#a78bfa", "#22d3ee", "#ff8a00", "#f472b6"];
 
-function t(id: string, initials: string, i: number, offers: number[], wants: number): Trader {
-  return { id, initials, color: C[i % C.length], offers, wants };
+function initials(name: string) {
+  return name.split(" ").map((w) => w[0]).join(". ").toUpperCase() + ".";
+}
+export function traderInitials(t: Trader) {
+  return initials(t.name).replace(/\s/g, "").slice(0, 2);
+}
+
+function t(id: string, name: string, i: number, offers: number[], wants: number, phone: string): Trader {
+  return { id, name, whatsapp: phone, color: C[i % C.length], offers, wants };
 }
 
 export const TRADE_POINTS: TradePoint[] = [
@@ -33,9 +41,9 @@ export const TRADE_POINTS: TradePoint[] = [
     lat: -23.5747,
     lng: -46.6997,
     traders: [
-      t("e1", "M. S.", 0, [7, 10, 30], 4),
-      t("e2", "R. A.", 1, [9, 18], 2),
-      t("e3", "C. L.", 2, [100, 22, 27], 6),
+      t("e1", "Marina Souza", 0, [7, 10, 30], 4, "5511991110001"),
+      t("e2", "Rafael Alves", 1, [9, 18], 2, "5511991110002"),
+      t("e3", "Camila Lima", 2, [100, 22, 27], 6, "5511991110003"),
     ],
   },
   {
@@ -45,8 +53,8 @@ export const TRADE_POINTS: TradePoint[] = [
     lat: -23.5874,
     lng: -46.6576,
     traders: [
-      t("i1", "J. P.", 3, [10, 9, 7], 3),
-      t("i2", "A. F.", 4, [18, 30, 22, 27], 5),
+      t("i1", "João Pereira", 3, [10, 9, 7], 3, "5511991110004"),
+      t("i2", "Ana Ferreira", 4, [18, 30, 22, 27], 5, "5511991110005"),
     ],
   },
   {
@@ -56,10 +64,10 @@ export const TRADE_POINTS: TradePoint[] = [
     lat: -23.5614,
     lng: -46.6559,
     traders: [
-      t("p1", "L. M.", 0, [30, 100], 2),
-      t("p2", "D. C.", 2, [7, 9, 10, 18], 7),
-      t("p3", "B. R.", 3, [22], 1),
-      t("p4", "F. G.", 5, [27, 9], 3),
+      t("p1", "Lucas Martins", 0, [30, 100], 2, "5511991110006"),
+      t("p2", "Daniela Castro", 2, [7, 9, 10, 18], 7, "5511991110007"),
+      t("p3", "Bruno Ramos", 3, [22], 1, "5511991110008"),
+      t("p4", "Fernanda Gomes", 5, [27, 9], 3, "5511991110009"),
     ],
   },
   {
@@ -69,8 +77,8 @@ export const TRADE_POINTS: TradePoint[] = [
     lat: -23.6,
     lng: -46.7197,
     traders: [
-      t("m1", "G. H.", 1, [9, 27], 2),
-      t("m2", "T. S.", 4, [10, 7, 100], 4),
+      t("m1", "Gustavo Henrique", 1, [9, 27], 2, "5511991110010"),
+      t("m2", "Thiago Santos", 4, [10, 7, 100], 4, "5511991110011"),
     ],
   },
   {
@@ -80,9 +88,9 @@ export const TRADE_POINTS: TradePoint[] = [
     lat: -23.5419,
     lng: -46.6295,
     traders: [
-      t("md1", "P. V.", 2, [18, 30, 22], 3),
-      t("md2", "H. C.", 5, [7, 10], 2),
-      t("md3", "S. O.", 0, [9, 27, 100], 5),
+      t("md1", "Paulo Vieira", 2, [18, 30, 22], 3, "5511991110012"),
+      t("md2", "Helena Costa", 5, [7, 10], 2, "5511991110013"),
+      t("md3", "Sofia Oliveira", 0, [9, 27, 100], 5, "5511991110014"),
     ],
   },
   {
@@ -92,8 +100,8 @@ export const TRADE_POINTS: TradePoint[] = [
     lat: -23.5275,
     lng: -46.6781,
     traders: [
-      t("a1", "E. N.", 3, [10, 18], 2),
-      t("a2", "V. L.", 1, [7, 9, 30, 22, 27], 6),
+      t("a1", "Eduardo Nunes", 3, [10, 18], 2, "5511991110015"),
+      t("a2", "Vitória Lopes", 1, [7, 9, 30, 22, 27], 6, "5511991110016"),
     ],
   },
 ];

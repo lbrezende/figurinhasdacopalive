@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 
 // Proxy leve (antigo "middleware"): NÃO importa Auth.js (que puxaria Prisma+
 // providers e estouraria o limite de 1MB de Edge Function). Só checa o cookie.
-const PROTECTED = ["/app", "/dashboard", "/settings"];
+const PROTECTED = ["/app", "/dashboard", "/settings", "/admin"];
 
 export default function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -23,5 +23,5 @@ export default function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/app/:path*", "/dashboard/:path*", "/settings/:path*"],
+  matcher: ["/app/:path*", "/dashboard/:path*", "/settings/:path*", "/admin/:path*"],
 };
