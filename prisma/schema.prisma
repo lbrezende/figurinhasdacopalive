@@ -116,14 +116,23 @@ model Sticker {
   id      String @id @default(cuid())
   albumId String
   album   Album  @relation(fields: [albumId], references: [id], onDelete: Cascade)
-  number  Int
+  number  Int // id estável interno (1..N) usado por coleção/trocas
   name    String
   rarity  Rarity @default(COMUM)
+
+  // Catálogo oficial (Copa 2026): código Panini, seleção e tipo da figurinha
+  code      String? // ex: "ARG17", "FWC1", "00"
+  teamCode  String? // ex: "ARG"; "FWC" para especiais
+  teamName  String? // ex: "Argentina"
+  kind      String? // SPECIAL | BADGE | PHOTO | PLAYER
+  displayNo Int? // número exibido dentro da seleção (sufixo do código)
+  verified  Boolean @default(true) // nome real confirmado? (false = nome fictício)
 
   ownerships StickerOwnership[]
 
   @@unique([albumId, number])
   @@index([albumId])
+  @@index([albumId, teamCode])
 }
 
 // Coleção do usuário em um álbum (o "meu álbum")

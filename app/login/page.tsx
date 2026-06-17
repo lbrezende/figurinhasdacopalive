@@ -9,16 +9,16 @@ export default function LoginPage({
   searchParams: Promise<{ callbackUrl?: string }>;
 }) {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
-      <Link href="/" className="mb-8 flex items-center gap-2.5 font-display text-lg font-extrabold">
-        <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-[#ffd23f] to-[#ff8a00] text-base">
+    <main className="flex min-h-screen flex-col items-center justify-center bg-canvas px-6 text-center">
+      <Link href="/" className="mb-8 flex items-center gap-2.5 text-lg font-bold text-ink">
+        <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-base">
           ⚽
         </span>
         Figura Certa
       </Link>
 
-      <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-[#151d33] p-8">
-        <h1 className="font-display text-2xl font-bold">Entrar no seu álbum</h1>
+      <div className="w-full max-w-sm rounded-2xl border border-hairline bg-canvas p-8 shadow-[var(--shadow-airbnb)]">
+        <h1 className="text-2xl font-bold text-ink">Entrar no seu álbum</h1>
         <p className="mt-2 text-sm text-muted">
           Crie sua conta em segundos. Os primeiros 14 dias são grátis. 🎉
         </p>
@@ -33,7 +33,7 @@ export default function LoginPage({
         >
           <button
             type="submit"
-            className="flex w-full items-center justify-center gap-3 rounded-xl bg-white px-6 py-3.5 font-display text-sm font-bold text-[#1f1f1f] transition hover:-translate-y-0.5"
+            className="flex w-full items-center justify-center gap-3 rounded-lg border border-ink bg-canvas px-6 py-3.5 text-sm font-semibold text-ink transition hover:bg-surface-soft"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1Z" />

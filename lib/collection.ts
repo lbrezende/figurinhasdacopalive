@@ -1,12 +1,21 @@
 import { db } from "@/lib/db";
 import type { Rarity } from "@prisma/client";
 
+export type StickerKind = "SPECIAL" | "BADGE" | "PHOTO" | "PLAYER";
+
 export type GridCell = {
   number: number;
   name: string;
   rarity: Rarity;
   have: boolean;
   repeated: number;
+  // Catálogo oficial da Copa 2026 (null nos álbuns gerados)
+  code: string | null;
+  teamCode: string | null;
+  teamName: string | null;
+  kind: StickerKind | null;
+  displayNo: number | null;
+  verified: boolean;
 };
 
 export type Counts = { have: number; miss: number; rep: number; total: number; pct: number };
@@ -47,6 +56,12 @@ export async function getGrid(collectionId: string, albumId: string): Promise<Gr
       rarity: s.rarity,
       have: o?.have ?? false,
       repeated: o?.repeated ?? 0,
+      code: s.code,
+      teamCode: s.teamCode,
+      teamName: s.teamName,
+      kind: (s.kind as StickerKind | null) ?? null,
+      displayNo: s.displayNo,
+      verified: s.verified,
     };
   });
 }

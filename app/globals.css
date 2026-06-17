@@ -1,36 +1,104 @@
 @import "tailwindcss";
 
+/* ============================================================
+   Figura Certa — Design System (Airbnb-inspired)
+   Fonte: voltagent/awesome-design-md → airbnb/DESIGN.md
+   Canvas branco · tinta #222 · um único voltage Rausch #ff385c
+   ============================================================ */
+
 :root {
-  --background: #070a13;
-  --foreground: #f3f4f6;
-  --muted: #9ca3af;
-  --card: rgba(21, 29, 53, 0.55);
-  --border: rgba(255, 255, 255, 0.08);
-  --primary: #ffd23f;
+  /* Surfaces */
+  --canvas: #ffffff;
+  --surface-soft: #f7f7f7;
+  --surface-strong: #f2f2f2;
+
+  /* Ink / text */
+  --ink: #222222;
+  --body: #3f3f3f;
+  --muted: #6a6a6a;
+  --muted-soft: #929292;
+
+  /* Hairlines & borders */
+  --hairline: #dddddd;
+  --hairline-soft: #ebebeb;
+  --border-strong: #c1c1c1;
+
+  /* Brand — Rausch (usado com parcimônia) */
+  --primary: #ff385c;
+  --primary-active: #e00b41;
+  --primary-disabled: #ffd1da;
+  --primary-soft: #fff0f3;
+  --on-primary: #ffffff;
+
+  /* Semânticos */
+  --error: #c13515;
+  --success: #008a05;
+
+  /* Aliases legados (mantêm classes antigas funcionando no tema claro) */
+  --background: var(--canvas);
+  --foreground: var(--ink);
+  --card: var(--canvas);
+  --border: var(--hairline);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  /* cores semânticas → geram bg-*, text-*, border-*, ring-*, fill-* */
+  --color-canvas: var(--canvas);
+  --color-surface-soft: var(--surface-soft);
+  --color-surface-strong: var(--surface-strong);
+
+  --color-ink: var(--ink);
+  --color-body: var(--body);
   --color-muted: var(--muted);
+  --color-muted-soft: var(--muted-soft);
+
+  --color-hairline: var(--hairline);
+  --color-hairline-soft: var(--hairline-soft);
+  --color-border-strong: var(--border-strong);
+
   --color-primary: var(--primary);
-  --font-sans: var(--font-jakarta);
-  --font-display: var(--font-outfit);
+  --color-primary-active: var(--primary-active);
+  --color-primary-disabled: var(--primary-disabled);
+  --color-primary-soft: var(--primary-soft);
+  --color-on-primary: var(--on-primary);
+
+  --color-error: var(--error);
+  --color-success: var(--success);
+
+  /* aliases legados */
+  --color-background: var(--canvas);
+  --color-foreground: var(--ink);
+
+  /* tipografia — Cereal VF não é licenciável; Inter é o substituto documentado */
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-inter);
+
+  /* raios — botões 8px, cards ~14-16px, pílulas full */
+  --radius-card: 14px;
+  --radius-xl-soft: 20px;
+  --radius-xxl-soft: 32px;
+
+  /* elevação — Airbnb tem essencialmente UM tier de sombra */
+  --shadow-airbnb: rgba(0, 0, 0, 0.02) 0 0 0 1px, rgba(0, 0, 0, 0.04) 0 2px 6px 0,
+    rgba(0, 0, 0, 0.1) 0 4px 8px 0;
+  --shadow-airbnb-lg: rgba(0, 0, 0, 0.04) 0 0 0 1px, rgba(0, 0, 0, 0.08) 0 6px 16px 0,
+    rgba(0, 0, 0, 0.12) 0 12px 28px 0;
 }
 
 body {
-  background: var(--background);
-  background-image: radial-gradient(circle at 50% -10%, #17223b 0%, #070a13 70%);
-  background-attachment: fixed;
-  color: var(--foreground);
-  font-family: var(--font-jakarta), system-ui, sans-serif;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-inter), -apple-system, system-ui, Roboto, "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-h1, h2, h3 {
-  font-family: var(--font-outfit), system-ui, sans-serif;
+/* Cereal mantém pesos modestos no display — Inter ~2% mais apertado no line-height */
+h1,
+h2,
+h3 {
+  font-family: var(--font-inter), system-ui, sans-serif;
+  letter-spacing: -0.02em;
 }
 
-/* Mapa: deixa os tiles claros do OpenStreetMap com aparência dark */
-.map-tiles-dark {
-  filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.9) saturate(0.85);
-}
+/* Tiles do mapa: Airbnb usa tiles claros (sem inversão dark) */

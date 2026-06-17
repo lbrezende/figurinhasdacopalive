@@ -1,18 +1,13 @@
 import type { Metadata } from "next";
-import { Outfit, Plus_Jakarta_Sans } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 
-const outfit = Outfit({
-  variable: "--font-outfit",
+// Airbnb roda em Cereal VF; Inter é o substituto open-source documentado no DESIGN.md.
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
-});
-
-const jakarta = Plus_Jakarta_Sans({
-  variable: "--font-jakarta",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -25,8 +20,8 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="pt-BR" className={`${outfit.variable} ${jakarta.variable}`}>
-      <body className="min-h-screen antialiased">
+    <html lang="pt-BR" className={inter.variable}>
+      <body className="min-h-screen bg-canvas text-ink antialiased">
         <Providers>{children}</Providers>
       </body>
     </html>

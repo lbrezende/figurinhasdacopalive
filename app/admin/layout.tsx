@@ -11,17 +11,17 @@ export default async function AdminLayout({
   const admin = await requireAdmin();
 
   return (
-    <div className="min-h-screen">
-      <header className="sticky top-0 z-20 border-b border-white/10 bg-[#070a13]/80 backdrop-blur">
+    <div className="min-h-screen bg-canvas">
+      <header className="sticky top-0 z-20 border-b border-hairline bg-canvas/90 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-3.5">
           <div className="flex items-center gap-3">
-            <Link href="/admin" className="flex items-center gap-2.5 font-display font-extrabold">
-              <span className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-[#ffd23f] to-[#ff8a00] text-sm">
+            <Link href="/admin" className="flex items-center gap-2.5 font-bold text-ink">
+              <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-sm">
                 ⚽
               </span>
               <span className="leading-none">
                 Figura Certa
-                <span className="ml-2 rounded-md border border-[#ffd23f]/25 bg-[#ffd23f]/10 px-1.5 py-0.5 align-middle text-[10px] font-bold uppercase tracking-wide text-[#ffd23f]">
+                <span className="ml-2 rounded-md border border-primary/25 bg-primary-soft px-1.5 py-0.5 align-middle text-[10px] font-bold uppercase tracking-wide text-primary">
                   Admin
                 </span>
               </span>
@@ -31,7 +31,7 @@ export default async function AdminLayout({
             <span className="hidden sm:inline">{admin.email}</span>
             <Link
               href="/app"
-              className="rounded-lg border border-white/10 px-3 py-1.5 font-semibold text-foreground transition hover:bg-white/5"
+              className="rounded-lg border border-hairline px-3 py-1.5 font-semibold text-ink transition hover:bg-surface-soft"
             >
               Ir pro app →
             </Link>

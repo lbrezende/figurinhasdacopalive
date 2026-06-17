@@ -4,7 +4,7 @@
 export type RarityKey = "COMUM" | "RARO" | "LENDARIO";
 
 export const ALBUMS = [
-  { id: "copa", name: "Copa do Mundo 2026", total: 670, emoji: "⚽" },
+  { id: "copa", name: "Copa do Mundo 2026", total: 980, emoji: "⚽" },
   { id: "brasil", name: "Brasileirão 2026", total: 480, emoji: "🇧🇷" },
   { id: "animais", name: "Reino Animal", total: 240, emoji: "🦁" },
   { id: "herois", name: "Super-Heróis", total: 300, emoji: "🦸" },

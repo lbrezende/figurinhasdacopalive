@@ -24,36 +24,34 @@ export default async function Home() {
   const isLoggedIn = !!session?.user;
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-canvas">
       {/* Mapa de trocas em tela cheia (primeiro contato) */}
       <MapExplorerSection isLoggedIn={isLoggedIn} userName={session?.user?.name ?? null} />
 
       {/* Hero */}
       <section className="relative px-6 pt-20 pb-14 text-center">
         <div className="mx-auto max-w-3xl">
-          <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#ffd23f]/25 bg-[#ffd23f]/10 px-4 py-1.5 text-sm font-semibold text-[#ffd23f]">
+          <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary-soft px-4 py-1.5 text-sm font-semibold text-primary">
             ⚽ Álbum da Copa do Mundo 2026 e muito mais
           </span>
-          <h1 className="mx-auto max-w-[14ch] font-display text-4xl font-black leading-[1.05] tracking-tight sm:text-6xl">
+          <h1 className="mx-auto max-w-[16ch] text-4xl font-bold leading-[1.08] tracking-tight text-ink sm:text-6xl">
             Pare de caçar troca.{" "}
-            <span className="bg-gradient-to-br from-[#ffd23f] to-[#ff8a00] bg-clip-text text-transparent">
-              A gente acha por você.
-            </span>
+            <span className="text-primary">A gente acha por você.</span>
           </h1>
-          <p className="mx-auto mt-5 max-w-[56ch] text-lg leading-relaxed text-muted">
-            O Figura Certa organiza seu álbum, descobre quem na <b className="text-foreground">sua cidade</b> tem a
+          <p className="mx-auto mt-5 max-w-[56ch] text-lg leading-relaxed text-body">
+            O Figura Certa organiza seu álbum, descobre quem na <b className="text-ink">sua cidade</b> tem a
             figurinha que falta — e ainda marca o ponto e a hora do encontro. Você só aparece e cola. 🎉
           </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-3.5">
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link
               href="/login"
-              className="rounded-xl bg-gradient-to-br from-[#ffd23f] to-[#ff8a00] px-8 py-4 font-display text-base font-bold text-[#0d0903] shadow-lg shadow-[#ffd23f]/30 transition hover:-translate-y-0.5"
+              className="rounded-lg bg-primary px-7 py-3.5 text-base font-semibold text-on-primary transition hover:bg-primary-active"
             >
               Começar agora — é grátis
             </Link>
             <Link
               href="/login"
-              className="rounded-xl border border-white/10 px-8 py-4 font-display text-base font-bold transition hover:bg-white/5"
+              className="rounded-lg border border-ink px-7 py-3.5 text-base font-semibold text-ink transition hover:bg-surface-soft"
             >
               Já tenho álbum
             </Link>
@@ -65,22 +63,22 @@ export default async function Home() {
       {/* Features */}
       <section className="px-6 py-16">
         <div className="mx-auto max-w-6xl">
-          <p className="mb-3 text-center text-xs font-bold uppercase tracking-[0.14em] text-[#ffd23f]">
+          <p className="mb-3 text-center text-xs font-bold uppercase tracking-[0.14em] text-primary">
             Tudo num app só
           </p>
-          <h2 className="mx-auto mb-12 max-w-[20ch] text-center font-display text-3xl font-extrabold sm:text-4xl">
+          <h2 className="mx-auto mb-12 max-w-[20ch] text-center text-3xl font-bold tracking-tight text-ink sm:text-4xl">
             Do álbum ao aperto de mão
           </h2>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {FEATURES.map((f) => (
               <div
                 key={f.title}
-                className="rounded-2xl border border-white/10 bg-[#151d33]/55 p-6 backdrop-blur transition hover:-translate-y-1 hover:border-[#ffd23f]/30"
+                className="rounded-2xl border border-hairline bg-canvas p-6 transition hover:shadow-[var(--shadow-airbnb)]"
               >
-                <div className="mb-4 grid h-12 w-12 place-items-center rounded-xl bg-gradient-to-br from-[#ffd23f] to-[#ff8a00] text-2xl">
+                <div className="mb-4 grid h-12 w-12 place-items-center rounded-xl bg-primary-soft text-2xl">
                   {f.icon}
                 </div>
-                <h3 className="mb-2 text-lg font-bold">{f.title}</h3>
+                <h3 className="mb-2 text-lg font-semibold text-ink">{f.title}</h3>
                 <p className="leading-relaxed text-muted">{f.desc}</p>
               </div>
             ))}
@@ -91,17 +89,17 @@ export default async function Home() {
       {/* How it works */}
       <section className="px-6 py-16">
         <div className="mx-auto max-w-6xl">
-          <p className="mb-3 text-center text-xs font-bold uppercase tracking-[0.14em] text-[#ffd23f]">Em 3 passos</p>
-          <h2 className="mx-auto mb-12 max-w-[20ch] text-center font-display text-3xl font-extrabold sm:text-4xl">
+          <p className="mb-3 text-center text-xs font-bold uppercase tracking-[0.14em] text-primary">Em 3 passos</p>
+          <h2 className="mx-auto mb-12 max-w-[20ch] text-center text-3xl font-bold tracking-tight text-ink sm:text-4xl">
             Comece a trocar hoje mesmo
           </h2>
           <div className="grid gap-6 md:grid-cols-3">
             {STEPS.map((s) => (
-              <div key={s.n} className="rounded-2xl border border-white/10 bg-[#151d33] p-7">
-                <div className="mb-2 bg-gradient-to-br from-[#ffd23f] to-[#ff8a00] bg-clip-text font-display text-4xl font-black text-transparent">
+              <div key={s.n} className="rounded-2xl border border-hairline bg-canvas p-7">
+                <div className="mb-3 grid h-11 w-11 place-items-center rounded-full bg-primary text-lg font-bold text-on-primary">
                   {s.n}
                 </div>
-                <h3 className="mb-1.5 text-lg font-bold">{s.title}</h3>
+                <h3 className="mb-1.5 text-lg font-semibold text-ink">{s.title}</h3>
                 <p className="leading-relaxed text-muted">{s.desc}</p>
               </div>
             ))}
@@ -112,14 +110,14 @@ export default async function Home() {
       {/* Pricing */}
       <section className="px-6 py-16">
         <div className="mx-auto max-w-md">
-          <p className="mb-3 text-center text-xs font-bold uppercase tracking-[0.14em] text-[#ffd23f]">Preço</p>
-          <h2 className="mb-10 text-center font-display text-3xl font-extrabold sm:text-4xl">Simples e justo</h2>
-          <div className="rounded-3xl border border-[#ffd23f]/25 bg-gradient-to-b from-[#ffd23f]/10 to-transparent p-8 text-center">
-            <div className="font-display text-sm font-bold uppercase tracking-wide text-[#ffd23f]">PRO</div>
-            <div className="mt-2 font-display text-5xl font-black">
+          <p className="mb-3 text-center text-xs font-bold uppercase tracking-[0.14em] text-primary">Preço</p>
+          <h2 className="mb-10 text-center text-3xl font-bold tracking-tight text-ink sm:text-4xl">Simples e justo</h2>
+          <div className="rounded-2xl border border-hairline bg-canvas p-8 text-center shadow-[var(--shadow-airbnb)]">
+            <div className="text-sm font-bold uppercase tracking-wide text-primary">PRO</div>
+            <div className="mt-2 text-5xl font-bold tracking-tight text-ink">
               R$ 19,90<span className="text-lg font-semibold text-muted">/mês</span>
             </div>
-            <ul className="mt-6 space-y-2.5 text-left text-sm">
+            <ul className="mt-6 space-y-2.5 text-left text-sm text-body">
               <li>✅ Álbuns ilimitados</li>
               <li>✅ Matches de troca na sua cidade</li>
               <li>✅ Pacote diário grátis</li>
@@ -127,7 +125,7 @@ export default async function Home() {
             </ul>
             <Link
               href="/login"
-              className="mt-8 block rounded-xl bg-gradient-to-br from-[#ffd23f] to-[#ff8a00] px-8 py-4 font-display font-bold text-[#0d0903] transition hover:-translate-y-0.5"
+              className="mt-8 block rounded-lg bg-primary px-8 py-3.5 font-semibold text-on-primary transition hover:bg-primary-active"
             >
               Começar 14 dias grátis
             </Link>
@@ -137,12 +135,10 @@ export default async function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="mt-auto border-t border-white/10 px-6 py-8">
+      <footer className="mt-auto border-t border-hairline px-6 py-8">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 text-sm text-muted">
-          <div className="flex items-center gap-2 font-display font-bold text-foreground">
-            <span className="grid h-7 w-7 place-items-center rounded-lg bg-gradient-to-br from-[#ffd23f] to-[#ff8a00] text-sm">
-              ⚽
-            </span>
+          <div className="flex items-center gap-2 font-semibold text-ink">
+            <span className="grid h-7 w-7 place-items-center rounded-lg bg-primary text-sm">⚽</span>
             Figura Certa
           </div>
           <div>Feito pra quem leva figurinha a sério. © 2026</div>

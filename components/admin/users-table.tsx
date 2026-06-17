@@ -14,9 +14,9 @@ type SortKey =
   | "lastActiveAt";
 
 const PLAN_STYLE: Record<string, string> = {
-  PRO: "border-emerald-400/30 bg-emerald-400/10 text-emerald-300",
-  TRIAL: "border-[#ffd23f]/30 bg-[#ffd23f]/10 text-[#ffd23f]",
-  FREE: "border-white/15 bg-white/5 text-muted",
+  PRO: "border-emerald-500/30 bg-emerald-50 text-emerald-700",
+  TRIAL: "border-primary/30 bg-primary-soft text-primary",
+  FREE: "border-hairline bg-surface-soft text-muted",
 };
 
 function fmtDate(iso: string | null): string {
@@ -71,10 +71,10 @@ export function AdminUsersTable({ rows }: { rows: AdminUserRow[] }) {
   }
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-[var(--card)]">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 p-4">
+    <div className="rounded-2xl border border-hairline bg-canvas">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline p-4">
         <div>
-          <h2 className="font-display text-lg font-bold">Usuários cadastrados</h2>
+          <h2 className="font-display text-lg font-bold text-ink">Usuários cadastrados</h2>
           <p className="text-xs text-muted">
             {filtered.length} de {rows.length} · clique numa pessoa para ver os detalhes
           </p>
@@ -83,14 +83,14 @@ export function AdminUsersTable({ rows }: { rows: AdminUserRow[] }) {
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Buscar nome, e-mail ou cidade…"
-          className="w-full max-w-xs rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none placeholder:text-muted focus:border-[#ffd23f]/40"
+          className="w-full max-w-xs rounded-lg border border-hairline bg-canvas px-3 py-2 text-sm text-ink outline-none placeholder:text-muted-soft focus:border-ink"
         />
       </div>
 
       <div className="overflow-x-auto">
         <table className="w-full min-w-[820px] text-sm">
           <thead>
-            <tr className="border-b border-white/10 text-left text-xs uppercase tracking-wide text-muted">
+            <tr className="border-b border-hairline text-left text-xs uppercase tracking-wide text-muted">
               <th className="px-4 py-2.5 font-semibold">Pessoa</th>
               <th className="px-4 py-2.5 font-semibold">Cidade</th>
               <th className="px-4 py-2.5 font-semibold">Plano</th>
@@ -104,12 +104,12 @@ export function AdminUsersTable({ rows }: { rows: AdminUserRow[] }) {
           </thead>
           <tbody>
             {filtered.map((r) => (
-              <tr key={r.id} className="group border-b border-white/5 transition hover:bg-white/[0.03]">
+              <tr key={r.id} className="group border-b border-hairline-soft transition hover:bg-surface-soft">
                 <td className="px-4 py-3">
                   <Link href={`/admin/users/${r.id}`} className="flex items-center gap-3">
                     <Avatar name={r.name} email={r.email} image={r.image} />
                     <span className="min-w-0">
-                      <span className="block truncate font-semibold text-foreground group-hover:text-[#ffd23f]">
+                      <span className="block truncate font-semibold text-ink group-hover:text-primary">
                         {r.name || "Sem nome"}
                       </span>
                       <span className="block truncate text-xs text-muted">{r.email || "—"}</span>
@@ -127,7 +127,7 @@ export function AdminUsersTable({ rows }: { rows: AdminUserRow[] }) {
                 <td className="px-4 py-3 tabular-nums">
                   <span className="font-semibold">{r.meetupsTotal}</span>
                   {r.meetupsDone > 0 && (
-                    <span className="ml-1 text-xs text-emerald-300">({r.meetupsDone}✓)</span>
+                    <span className="ml-1 text-xs text-emerald-600">({r.meetupsDone}✓)</span>
                   )}
                 </td>
                 <td className="px-4 py-3 tabular-nums text-muted">
@@ -166,7 +166,7 @@ function Th({
     <th className="px-4 py-2.5 font-semibold">
       <button
         onClick={onClick}
-        className={`inline-flex items-center gap-1 transition hover:text-foreground ${active ? "text-[#ffd23f]" : ""}`}
+        className={`inline-flex items-center gap-1 transition hover:text-ink ${active ? "text-primary" : ""}`}
       >
         {label}
         <span className="text-[10px]">{active ? (dir === "asc" ? "▲" : "▼") : "⇅"}</span>
@@ -195,7 +195,7 @@ function Avatar({
     .map((s) => s[0]?.toUpperCase())
     .join("");
   return (
-    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white/10 text-xs font-bold text-muted">
+    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-surface-strong text-xs font-bold text-muted">
       {initials || "?"}
     </span>
   );

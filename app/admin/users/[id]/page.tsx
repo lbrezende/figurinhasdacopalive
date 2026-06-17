@@ -8,9 +8,9 @@ import type { GridCell, Match } from "@/lib/collection";
 export const dynamic = "force-dynamic";
 
 const STATUS_STYLE: Record<string, string> = {
-  done: "border-emerald-400/30 bg-emerald-400/10 text-emerald-300",
-  scheduled: "border-[#ffd23f]/30 bg-[#ffd23f]/10 text-[#ffd23f]",
-  cancelled: "border-rose-400/30 bg-rose-400/10 text-rose-300",
+  done: "border-emerald-500/30 bg-emerald-50 text-emerald-700",
+  scheduled: "border-primary/30 bg-primary-soft text-primary",
+  cancelled: "border-rose-500/30 bg-rose-50 text-rose-600",
 };
 const STATUS_LABEL: Record<string, string> = {
   done: "Concluída",
@@ -49,25 +49,25 @@ export default async function AdminUserPage({
 
   return (
     <div className="space-y-6">
-      <Link href="/admin" className="inline-flex text-sm text-muted hover:text-foreground">
+      <Link href="/admin" className="inline-flex text-sm text-muted hover:text-ink">
         ← Voltar ao painel
       </Link>
 
       {/* Cabeçalho */}
-      <div className="flex flex-wrap items-center gap-4 rounded-2xl border border-white/10 bg-[var(--card)] p-5">
+      <div className="flex flex-wrap items-center gap-4 rounded-2xl border border-hairline bg-canvas p-5">
         {user.image ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={user.image} alt="" className="h-16 w-16 rounded-full object-cover" />
         ) : (
-          <span className="grid h-16 w-16 place-items-center rounded-full bg-white/10 font-display text-xl font-bold text-muted">
+          <span className="grid h-16 w-16 place-items-center rounded-full bg-surface-strong font-display text-xl font-bold text-muted">
             {initials || "?"}
           </span>
         )}
         <div className="min-w-0 flex-1">
-          <h1 className="font-display text-2xl font-extrabold">{user.name || "Sem nome"}</h1>
+          <h1 className="font-display text-2xl font-extrabold text-ink">{user.name || "Sem nome"}</h1>
           <p className="text-sm text-muted">{user.email || "—"}</p>
         </div>
-        <span className="rounded-md border border-[#ffd23f]/25 bg-[#ffd23f]/10 px-2.5 py-1 text-xs font-bold text-[#ffd23f]">
+        <span className="rounded-md border border-primary/25 bg-primary-soft px-2.5 py-1 text-xs font-bold text-primary">
           {user.plan}
         </span>
       </div>
@@ -83,7 +83,7 @@ export default async function AdminUserPage({
       </div>
 
       {/* Localização & contato */}
-      <section className="rounded-2xl border border-white/10 bg-[var(--card)] p-5">
+      <section className="rounded-2xl border border-hairline bg-canvas p-5">
         <h2 className="mb-3 font-display text-lg font-bold">Localização & contato</h2>
         <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 text-sm">
           <Field label="Cidade" value={user.city || "— não informada"} />
@@ -103,7 +103,7 @@ export default async function AdminUserPage({
       <section className="space-y-4">
         <h2 className="font-display text-lg font-bold">Figurinhas por álbum</h2>
         {collections.length === 0 && (
-          <p className="rounded-2xl border border-white/10 bg-[var(--card)] p-5 text-sm text-muted">
+          <p className="rounded-2xl border border-hairline bg-canvas p-5 text-sm text-muted">
             Esta pessoa ainda não criou nenhuma coleção.
           </p>
         )}
@@ -111,7 +111,7 @@ export default async function AdminUserPage({
           <details
             key={c.collectionId}
             open={i === 0}
-            className="rounded-2xl border border-white/10 bg-[var(--card)] p-5"
+            className="rounded-2xl border border-hairline bg-canvas p-5"
           >
             <summary className="flex cursor-pointer flex-wrap items-center justify-between gap-3">
               <span className="flex items-center gap-2.5 font-semibold">
@@ -119,14 +119,14 @@ export default async function AdminUserPage({
                 {c.albumName}
               </span>
               <span className="flex items-center gap-4 text-sm text-muted">
-                <span><b className="text-foreground">{c.have}</b>/{c.total} ({c.pct}%)</span>
+                <span><b className="text-ink">{c.have}</b>/{c.total} ({c.pct}%)</span>
                 <span>{c.repeated} repetidas</span>
                 <span>{c.packsOpened} pacotes</span>
               </span>
             </summary>
-            <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/5">
+            <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-surface-strong">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-[#ffd23f] to-[#ff8a00]"
+                className="h-full rounded-full bg-primary"
                 style={{ width: `${c.pct}%` }}
               />
             </div>
@@ -143,12 +143,12 @@ export default async function AdminUserPage({
           Colecionadores na mesma cidade com troca complementar (repetidas dela × faltas deles).
         </p>
         {matchGroups.length === 0 && (
-          <p className="rounded-2xl border border-white/10 bg-[var(--card)] p-5 text-sm text-muted">
+          <p className="rounded-2xl border border-hairline bg-canvas p-5 text-sm text-muted">
             Nenhuma oportunidade de troca no momento (sem cidade, sem repetidas ou sem vizinhos).
           </p>
         )}
         {matchGroups.map((g) => (
-          <div key={g.albumId} className="rounded-2xl border border-white/10 bg-[var(--card)] p-5">
+          <div key={g.albumId} className="rounded-2xl border border-hairline bg-canvas p-5">
             <p className="mb-3 flex items-center gap-2 font-semibold">
               <span>{g.emoji}</span> {g.albumName}
               <span className="text-xs font-normal text-muted">· {g.matches.length} matches</span>
@@ -166,15 +166,15 @@ export default async function AdminUserPage({
       <section className="space-y-3">
         <h2 className="font-display text-lg font-bold">Trocas (encontros)</h2>
         {meetups.length === 0 && (
-          <p className="rounded-2xl border border-white/10 bg-[var(--card)] p-5 text-sm text-muted">
+          <p className="rounded-2xl border border-hairline bg-canvas p-5 text-sm text-muted">
             Nenhuma troca marcada ainda.
           </p>
         )}
         {meetups.length > 0 && (
-          <div className="overflow-x-auto rounded-2xl border border-white/10 bg-[var(--card)]">
+          <div className="overflow-x-auto rounded-2xl border border-hairline bg-canvas">
             <table className="w-full min-w-[760px] text-sm">
               <thead>
-                <tr className="border-b border-white/10 text-left text-xs uppercase tracking-wide text-muted">
+                <tr className="border-b border-hairline text-left text-xs uppercase tracking-wide text-muted">
                   <th className="px-4 py-2.5 font-semibold">Quando</th>
                   <th className="px-4 py-2.5 font-semibold">Papel</th>
                   <th className="px-4 py-2.5 font-semibold">Parceiro</th>
@@ -185,7 +185,7 @@ export default async function AdminUserPage({
               </thead>
               <tbody>
                 {meetups.map((m) => (
-                  <tr key={`${m.id}-${m.role}`} className="border-b border-white/5">
+                  <tr key={`${m.id}-${m.role}`} className="border-b border-hairline-soft">
                     <td className="px-4 py-3 text-muted">{fmtDateTime(m.createdAt)}</td>
                     <td className="px-4 py-3">
                       <span className="text-xs text-muted">{m.role === "owner" ? "Organizou" : "Convidado"}</span>
@@ -195,8 +195,8 @@ export default async function AdminUserPage({
                       {m.point} · {m.day} {m.time}
                     </td>
                     <td className="px-4 py-3">
-                      <span className="text-[#ff8a00]">↑{m.giveNumbers.length}</span>{" "}
-                      <span className="text-emerald-300">↓{m.getNumbers.length}</span>
+                      <span className="text-primary">↑{m.giveNumbers.length}</span>{" "}
+                      <span className="text-emerald-600">↓{m.getNumbers.length}</span>
                     </td>
                     <td className="px-4 py-3">
                       <span className={`rounded-md border px-2 py-0.5 text-[11px] font-bold ${STATUS_STYLE[m.status] ?? STATUS_STYLE.scheduled}`}>
@@ -218,9 +218,9 @@ export default async function AdminUserPage({
 
 function Stat({ label, value }: { label: string; value: number | string }) {
   return (
-    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3.5">
+    <div className="rounded-xl border border-hairline bg-surface-soft p-3.5">
       <p className="text-[11px] font-semibold uppercase tracking-wide text-muted">{label}</p>
-      <p className="mt-1 font-display text-xl font-extrabold tabular-nums">{value}</p>
+      <p className="mt-1 font-display text-xl font-extrabold tabular-nums text-ink">{value}</p>
     </div>
   );
 }
@@ -229,7 +229,7 @@ function Field({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted">{label}</dt>
-      <dd className="mt-0.5 font-medium">{value}</dd>
+      <dd className="mt-0.5 font-medium text-ink">{value}</dd>
     </div>
   );
 }
@@ -241,10 +241,10 @@ function StickerGrid({ grid }: { grid: GridCell[] }) {
         const state = c.repeated > 0 ? "rep" : c.have ? "have" : "miss";
         const cls =
           state === "rep"
-            ? "bg-[#ffd23f] text-[#0d0903] font-bold"
+            ? "bg-violet-500 text-white font-bold"
             : state === "have"
-            ? "border border-[#ffd23f]/50 text-[#ffd23f]"
-            : "border border-white/10 text-muted/50";
+            ? "border border-emerald-500/50 text-emerald-600"
+            : "border border-hairline text-muted-soft";
         return (
           <span
             key={c.number}
@@ -264,13 +264,13 @@ function Legend() {
   return (
     <div className="mt-3 flex flex-wrap gap-4 text-[11px] text-muted">
       <span className="flex items-center gap-1.5">
-        <span className="h-3 w-3 rounded bg-[#ffd23f]" /> repetida
+        <span className="h-3 w-3 rounded bg-violet-500" /> repetida
       </span>
       <span className="flex items-center gap-1.5">
-        <span className="h-3 w-3 rounded border border-[#ffd23f]/50" /> tem
+        <span className="h-3 w-3 rounded border border-emerald-500/50" /> tem
       </span>
       <span className="flex items-center gap-1.5">
-        <span className="h-3 w-3 rounded border border-white/10" /> falta
+        <span className="h-3 w-3 rounded border border-hairline" /> falta
       </span>
     </div>
   );
@@ -278,10 +278,10 @@ function Legend() {
 
 function MatchRow({ m }: { m: Match }) {
   return (
-    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
+    <div className="rounded-xl border border-hairline bg-surface-soft p-3">
       <div className="mb-2 flex items-center justify-between">
-        <span className="font-semibold">{m.name}</span>
-        <span className="rounded-md bg-[#ffd23f]/15 px-2 py-0.5 text-xs font-bold text-[#ffd23f]">
+        <span className="font-semibold text-ink">{m.name}</span>
+        <span className="rounded-md bg-primary-soft px-2 py-0.5 text-xs font-bold text-primary">
           score {m.score}
         </span>
       </div>
@@ -302,7 +302,7 @@ function NumberSet({
   tone: "get" | "give";
   nums: number[];
 }) {
-  const chip = tone === "get" ? "border-emerald-400/30 text-emerald-300" : "border-[#ff8a00]/30 text-[#ff8a00]";
+  const chip = tone === "get" ? "border-emerald-500/30 text-emerald-700" : "border-primary/30 text-primary";
   return (
     <div>
       <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted">

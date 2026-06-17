@@ -25,7 +25,7 @@ type Table = {
 type GroupKey = "core" | "auth" | "catalog" | "collection" | "trade";
 
 const GROUPS: Record<GroupKey, { color: string; label: string }> = {
-  core: { color: "#ffd23f", label: "Núcleo / Conta" },
+  core: { color: "#ff385c", label: "Núcleo / Conta" },
   auth: { color: "#22d3ee", label: "Autenticação (Auth.js)" },
   catalog: { color: "#34d399", label: "Catálogo (álbuns)" },
   collection: { color: "#c084fc", label: "Coleção do usuário" },
@@ -207,7 +207,7 @@ function makeTableTexture(table: Table) {
   ctx.fillRect(0, 0, W, headerH);
   ctx.restore();
   ctx.fillStyle = "#0d1221";
-  ctx.font = "700 22px Outfit, system-ui, sans-serif";
+  ctx.font = "700 22px Inter, system-ui, sans-serif";
   ctx.textBaseline = "middle";
   ctx.fillText(table.id, 16, headerH / 2 + 1);
 
@@ -221,24 +221,24 @@ function makeTableTexture(table: Table) {
     // badge
     let badge = "";
     let badgeColor = "";
-    if (f.pk) { badge = "PK"; badgeColor = "#ffd23f"; }
+    if (f.pk) { badge = "PK"; badgeColor = "#ff385c"; }
     else if (f.fk) { badge = "FK"; badgeColor = "#22d3ee"; }
     else if (f.unique) { badge = "U"; badgeColor = "#34d399"; }
-    ctx.font = "600 14px 'Plus Jakarta Sans', system-ui, sans-serif";
+    ctx.font = "600 14px Inter, system-ui, sans-serif";
     let x = 16;
     if (badge) {
       ctx.fillStyle = badgeColor;
       ctx.fillRect(x, y - 8, badge.length > 1 ? 22 : 14, 16);
       ctx.fillStyle = "#0d1221";
-      ctx.font = "700 11px 'Plus Jakarta Sans', sans-serif";
+      ctx.font = "700 11px Inter, sans-serif";
       ctx.fillText(badge, x + 2, y + 1);
       x += badge.length > 1 ? 30 : 22;
     }
     ctx.fillStyle = "#e8eaf0";
-    ctx.font = "600 15px 'Plus Jakarta Sans', sans-serif";
+    ctx.font = "600 15px Inter, sans-serif";
     ctx.fillText(f.name, x, y);
     ctx.fillStyle = "#7c8bb0";
-    ctx.font = "500 14px 'Plus Jakarta Sans', sans-serif";
+    ctx.font = "500 14px Inter, sans-serif";
     ctx.textAlign = "right";
     ctx.fillText(f.type, W - 14, y);
     ctx.textAlign = "left";
@@ -459,7 +459,7 @@ export default function ModeloDeDados() {
         <div className="pointer-events-auto">
           <a href="/" className="font-display text-sm font-bold text-white/60 hover:text-white">← Figura Certa</a>
           <h1 className="mt-1 font-display text-2xl font-black text-white">
-            Modelo de dados <span className="text-[#ffd23f]">em 3D</span>
+            Modelo de dados <span className="text-[#ff385c]">em 3D</span>
           </h1>
           <p className="mt-1 max-w-md text-xs text-white/50">
             Arraste pra girar · scroll pra zoom · clique numa tabela pra dar drill-down e ver os relacionamentos.
@@ -474,7 +474,7 @@ export default function ModeloDeDados() {
             </div>
           ))}
           <div className="mt-2 flex flex-wrap gap-2 border-t border-white/10 pt-2 text-[10px] text-white/50">
-            <span><b className="text-[#ffd23f]">PK</b> chave</span>
+            <span><b className="text-[#ff385c]">PK</b> chave</span>
             <span><b className="text-[#22d3ee]">FK</b> relação</span>
             <span><b className="text-[#34d399]">U</b> único</span>
           </div>
@@ -498,7 +498,7 @@ export default function ModeloDeDados() {
             {sel.fields.map((f) => (
               <li key={f.name} className="flex items-center justify-between gap-2 text-sm">
                 <span className="flex items-center gap-1.5">
-                  {f.pk && <b className="rounded bg-[#ffd23f] px-1 text-[10px] text-black">PK</b>}
+                  {f.pk && <b className="rounded bg-[#ff385c] px-1 text-[10px] text-black">PK</b>}
                   {f.fk && <b className="rounded bg-[#22d3ee] px-1 text-[10px] text-black">FK</b>}
                   {f.unique && !f.pk && <b className="rounded bg-[#34d399] px-1 text-[10px] text-black">U</b>}
                   <span className="text-white/90">{f.name}</span>

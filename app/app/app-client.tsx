@@ -15,6 +15,13 @@ type Meetup = { id: string; partnerName: string | null; point: string; day: stri
 type Tab = "album" | "trade" | "meets" | "profile";
 const RARITY_LABEL = { COMUM: "Comum", RARO: "Rara ✦", LENDARIO: "Lendária ★" } as const;
 
+// Figurinhas usam fills sólidos (Airbnb evita gradientes): Rausch p/ lendária, violeta p/ rara, sky p/ comum.
+const RARITY_CARD = {
+  LENDARIO: "bg-primary text-on-primary",
+  RARO: "bg-violet-500 text-white",
+  COMUM: "bg-sky-500 text-white",
+} as const;
+
 export function AppClient({
   user, album, initialGrid, initialCounts,
 }: { user: UserT; album: Album; initialGrid: Cell[]; initialCounts: Counts }) {
@@ -99,8 +106,8 @@ export function AppClient({
   function jumpTo(n: number) {
     const el = gridRef.current?.querySelector(`[data-num="${n}"]`);
     el?.scrollIntoView({ behavior: "smooth", block: "center" });
-    (el as HTMLElement)?.classList.add("ring-2", "ring-[#ffd23f]");
-    setTimeout(() => (el as HTMLElement)?.classList.remove("ring-2", "ring-[#ffd23f]"), 1600);
+    (el as HTMLElement)?.classList.add("ring-2", "ring-primary");
+    setTimeout(() => (el as HTMLElement)?.classList.remove("ring-2", "ring-primary"), 1600);
   }
 
   const visible = grid.filter((c) => {
@@ -151,19 +158,19 @@ export function AppClient({
   }
 
   return (
-    <div className="min-h-screen pb-24">
+    <div className="min-h-screen bg-canvas pb-24">
       {/* Header */}
-      <header className="sticky top-0 z-30 border-b border-white/10 bg-[#070a13]/80 backdrop-blur-xl">
+      <header className="sticky top-0 z-30 border-b border-hairline bg-canvas/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2.5">
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-[#ffd23f] to-[#ff8a00] text-base">{album.emoji}</span>
+            <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-base">{album.emoji}</span>
             <div>
-              <div className="font-display text-sm font-extrabold leading-tight">Figura Certa</div>
+              <div className="text-sm font-bold leading-tight text-ink">Figura Certa</div>
               <div className="text-xs text-muted">{album.name}</div>
             </div>
           </div>
           <div className="text-right text-xs">
-            <b>{user.name?.split(" ")[0]}</b>
+            <b className="text-ink">{user.name?.split(" ")[0]}</b>
             <div className="text-muted">📍 {user.city}</div>
           </div>
         </div>
@@ -171,7 +178,7 @@ export function AppClient({
 
       <main className="mx-auto max-w-2xl px-4 py-5">
         {trialDays > 0 && (
-          <div className="mb-4 rounded-xl border border-[#ffd23f]/25 bg-[#ffd23f]/10 px-4 py-2.5 text-sm">
+          <div className="mb-4 rounded-xl border border-primary/20 bg-primary-soft px-4 py-2.5 text-sm text-ink">
             🎁 Período grátis — <b>{trialDays}</b> {trialDays === 1 ? "dia" : "dias"}.
           </div>
         )}
@@ -180,33 +187,33 @@ export function AppClient({
         {tab === "album" && (
           <div className="space-y-4">
             {/* stats */}
-            <div className="flex items-center gap-5 rounded-2xl border border-white/10 bg-[#151d33]/60 p-5">
+            <div className="flex items-center gap-5 rounded-2xl border border-hairline bg-canvas p-5 shadow-[var(--shadow-airbnb)]">
               <div className="relative h-[86px] w-[86px] shrink-0">
                 <svg width="86" height="86" className="-rotate-90">
-                  <circle stroke="rgba(255,255,255,0.06)" strokeWidth="6" fill="transparent" r="38" cx="43" cy="43" />
-                  <circle stroke="#34d399" strokeWidth="6" fill="transparent" r="38" cx="43" cy="43"
+                  <circle stroke="#ebebeb" strokeWidth="6" fill="transparent" r="38" cx="43" cy="43" />
+                  <circle stroke="#10b981" strokeWidth="6" fill="transparent" r="38" cx="43" cy="43"
                     strokeDasharray="238.76" strokeDashoffset={238.76 - (counts.pct / 100) * 238.76} strokeLinecap="round" />
                 </svg>
-                <div className="absolute inset-0 grid place-items-center font-display text-lg font-bold">{counts.pct}%</div>
+                <div className="absolute inset-0 grid place-items-center text-lg font-bold text-ink">{counts.pct}%</div>
               </div>
               <div className="flex-1">
-                <h2 className="font-display text-lg font-bold">Meu Álbum</h2>
+                <h2 className="text-lg font-bold text-ink">Meu Álbum</h2>
                 <div className="mt-2 grid grid-cols-3 gap-2 text-center">
-                  <Stat n={counts.have} l="Tenho" c="text-emerald-400" />
-                  <Stat n={counts.miss} l="Faltam" c="text-rose-400" />
-                  <Stat n={counts.rep} l="Repetidas" c="text-purple-400" />
+                  <Stat n={counts.have} l="Tenho" c="text-emerald-600" />
+                  <Stat n={counts.miss} l="Faltam" c="text-rose-500" />
+                  <Stat n={counts.rep} l="Repetidas" c="text-violet-600" />
                 </div>
               </div>
             </div>
 
             {/* pacote */}
-            <div className="flex items-center gap-4 rounded-2xl border border-white/10 bg-[#151d33]/60 p-5">
+            <div className="flex items-center gap-4 rounded-2xl border border-hairline bg-canvas p-5">
               <div className="text-4xl">🎁</div>
               <div className="flex-1">
-                <h3 className="font-bold">Pacote diário grátis</h3>
+                <h3 className="font-bold text-ink">Pacote diário grátis</h3>
                 <p className="text-xs text-muted">5 figurinhas pra acelerar o álbum.</p>
                 <div className="mt-2 flex items-center gap-3">
-                  <button onClick={() => openPack(false)} disabled={packLoading} className="rounded-lg bg-gradient-to-br from-[#ffd23f] to-[#ff8a00] px-4 py-2 text-sm font-bold text-[#0d0903] disabled:opacity-60">
+                  <button onClick={() => openPack(false)} disabled={packLoading} className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-on-primary transition hover:bg-primary-active disabled:bg-primary-disabled">
                     {packLoading ? "Abrindo…" : "Abrir pacote"}
                   </button>
                   <button onClick={() => openPack(true)} className="text-xs text-muted underline">Pular cooldown (demo)</button>
@@ -215,25 +222,25 @@ export function AppClient({
             </div>
 
             {/* busca + filtros */}
-            <div className="rounded-2xl border border-white/10 bg-[#151d33]/60 p-4">
-              <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-[#0a0f1e] px-3 py-2">
+            <div className="rounded-2xl border border-hairline bg-canvas p-4">
+              <div className="flex items-center gap-2 rounded-xl border border-hairline bg-surface-soft px-3 py-2">
                 <span>🔎</span>
                 <input value={search} onChange={(e) => setSearch(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter" && search) jumpTo(Number(search)); }}
-                  inputMode="numeric" placeholder="Ir para o número… (Enter)" className="w-full bg-transparent text-sm outline-none" />
+                  inputMode="numeric" placeholder="Ir para o número… (Enter)" className="w-full bg-transparent text-sm text-ink outline-none placeholder:text-muted-soft" />
               </div>
               <div className="mt-3 flex gap-2">
                 {(["all", "miss", "have", "rep"] as const).map((f) => (
                   <button key={f} onClick={() => setFilter(f)}
-                    className={`rounded-full px-3 py-1.5 text-xs font-semibold ${filter === f ? "bg-[#ffd23f] text-black" : "bg-white/5 text-white/70"}`}>
+                    className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${filter === f ? "bg-ink text-white" : "bg-surface-soft text-body hover:bg-surface-strong"}`}>
                     {f === "all" ? "Todas" : f === "miss" ? "Faltam" : f === "have" ? "Tenho" : "Repetidas"}
                   </button>
                 ))}
               </div>
               <div className="mt-3 flex gap-4 text-xs text-muted">
-                <span className="flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-full bg-white/15" /> Falta</span>
+                <span className="flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-full bg-surface-strong" /> Falta</span>
                 <span className="flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-full bg-emerald-500" /> Tenho</span>
-                <span className="flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-full bg-purple-500" /> Repetida</span>
+                <span className="flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-full bg-violet-500" /> Repetida</span>
               </div>
 
               <div ref={gridRef} className="mt-4 grid grid-cols-6 gap-1.5 sm:grid-cols-8">
@@ -243,7 +250,7 @@ export function AppClient({
                     <button key={c.number} data-num={c.number}
                       onPointerDown={() => onCellDown(c)} onPointerUp={() => onCellUp(c)} onPointerLeave={() => pressTimer.current && clearTimeout(pressTimer.current)}
                       onContextMenu={(e) => { e.preventDefault(); setDetail(c); }}
-                      className={`relative aspect-square rounded-md text-xs font-bold transition ${st === "rep" ? "bg-purple-500 text-white" : st === "have" ? "bg-emerald-500 text-black" : "bg-white/5 text-white/40"}`}>
+                      className={`relative aspect-square rounded-md text-xs font-bold transition ${st === "rep" ? "bg-violet-500 text-white" : st === "have" ? "bg-emerald-500 text-white" : "bg-surface-soft text-muted-soft"}`}>
                       {c.number}
                       {c.rarity === "LENDARIO" && <span className="absolute -right-0.5 -top-0.5 text-[8px]">⭐</span>}
                       {c.repeated > 1 && <span className="absolute bottom-0 right-0.5 text-[8px]">×{c.repeated}</span>}
@@ -259,30 +266,30 @@ export function AppClient({
         {/* ===== TROCAS ===== */}
         {tab === "trade" && (
           <div className="space-y-3">
-            <div className="rounded-2xl border border-white/10 bg-[#151d33]/60 p-5">
-              <h2 className="font-display text-lg font-bold">🤝 Trocas em {matchCity || "—"}</h2>
+            <div className="rounded-2xl border border-hairline bg-canvas p-5">
+              <h2 className="text-lg font-bold text-ink">🤝 Trocas em {matchCity || "—"}</h2>
               <p className="mt-1 text-sm text-muted">Quem tem o que você precisa e quer suas repetidas. Maior score = melhor troca.</p>
-              <button onClick={loadMatches} className="mt-3 rounded-lg bg-white/5 px-3 py-1.5 text-xs font-semibold">Atualizar</button>
+              <button onClick={loadMatches} className="mt-3 rounded-lg bg-surface-soft px-3 py-1.5 text-xs font-semibold text-ink transition hover:bg-surface-strong">Atualizar</button>
             </div>
             {matches === null && <p className="text-center text-sm text-muted">Carregando…</p>}
             {matches?.length === 0 && (
-              <div className="rounded-2xl border border-white/10 bg-[#151d33]/60 p-5 text-center text-sm text-muted">
-                Ninguém na sua cidade ainda. Crie <b>vizinhos de demonstração</b> no Perfil pra ver como funciona. 👥
+              <div className="rounded-2xl border border-hairline bg-canvas p-5 text-center text-sm text-muted">
+                Ninguém na sua cidade ainda. Crie <b className="text-ink">vizinhos de demonstração</b> no Perfil pra ver como funciona. 👥
               </div>
             )}
             {matches?.map((m) => (
-              <div key={m.userId} className="rounded-2xl border border-white/10 bg-[#151d33]/60 p-4">
+              <div key={m.userId} className="rounded-2xl border border-hairline bg-canvas p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <b>{m.name}</b>
-                    <div className="text-xs text-muted">Te dá <b className="text-emerald-400">{m.theyGive.length}</b> · quer <b className="text-purple-400">{m.theyWant.length}</b> suas</div>
+                    <b className="text-ink">{m.name}</b>
+                    <div className="text-xs text-muted">Te dá <b className="text-emerald-600">{m.theyGive.length}</b> · quer <b className="text-violet-600">{m.theyWant.length}</b> suas</div>
                   </div>
                   <div className="text-right">
-                    <div className="font-display text-2xl font-black text-[#ffd23f]">{m.score}</div>
+                    <div className="text-2xl font-bold text-primary">{m.score}</div>
                     <div className="text-[10px] text-muted">score</div>
                   </div>
                 </div>
-                <button onClick={() => setScheduling(m)} className="mt-3 w-full rounded-lg bg-gradient-to-br from-[#ffd23f] to-[#ff8a00] py-2 text-sm font-bold text-[#0d0903]">Marcar troca</button>
+                <button onClick={() => setScheduling(m)} className="mt-3 w-full rounded-lg bg-primary py-2 text-sm font-semibold text-on-primary transition hover:bg-primary-active">Marcar troca</button>
               </div>
             ))}
           </div>
@@ -291,14 +298,14 @@ export function AppClient({
         {/* ===== ENCONTROS ===== */}
         {tab === "meets" && (
           <div className="space-y-3">
-            <div className="rounded-2xl border border-white/10 bg-[#151d33]/60 p-5">
-              <h2 className="font-display text-lg font-bold">📅 Minhas trocas marcadas</h2>
+            <div className="rounded-2xl border border-hairline bg-canvas p-5">
+              <h2 className="text-lg font-bold text-ink">📅 Minhas trocas marcadas</h2>
             </div>
             {meetups === null && <p className="text-center text-sm text-muted">Carregando…</p>}
-            {meetups?.length === 0 && <p className="rounded-2xl border border-white/10 bg-[#151d33]/60 p-5 text-center text-sm text-muted">Nenhum encontro marcado ainda. Vá em Trocas e marque um! 🤝</p>}
+            {meetups?.length === 0 && <p className="rounded-2xl border border-hairline bg-canvas p-5 text-center text-sm text-muted">Nenhum encontro marcado ainda. Vá em Trocas e marque um! 🤝</p>}
             {meetups?.map((m) => (
-              <div key={m.id} className="rounded-2xl border border-white/10 bg-[#151d33]/60 p-4">
-                <b>{m.partnerName}</b>
+              <div key={m.id} className="rounded-2xl border border-hairline bg-canvas p-4">
+                <b className="text-ink">{m.partnerName}</b>
                 <div className="mt-1 text-sm text-muted">📍 {m.point}</div>
                 <div className="text-sm text-muted">🕐 {m.day} · {m.time}</div>
                 <div className="mt-2 text-xs text-muted">Leva {m.giveNumbers.length} · recebe {m.getNumbers.length}</div>
@@ -310,30 +317,30 @@ export function AppClient({
         {/* ===== PERFIL ===== */}
         {tab === "profile" && (
           <div className="space-y-4">
-            <div className="rounded-2xl border border-white/10 bg-[#151d33]/60 p-5">
-              <h2 className="font-display text-lg font-bold">👤 Meu perfil</h2>
-              <label className="mt-3 block text-sm font-semibold">Nome</label>
-              <input value={name} onChange={(e) => setName(e.target.value)} className="mt-1 w-full rounded-xl border border-white/10 bg-[#0a0f1e] px-4 py-2.5 text-sm" />
-              <label className="mt-3 block text-sm font-semibold">Cidade</label>
-              <select value={city} onChange={(e) => setCity(e.target.value)} className="mt-1 w-full rounded-xl border border-white/10 bg-[#0a0f1e] px-4 py-2.5 text-sm">
+            <div className="rounded-2xl border border-hairline bg-canvas p-5">
+              <h2 className="text-lg font-bold text-ink">👤 Meu perfil</h2>
+              <label className="mt-3 block text-sm font-semibold text-ink">Nome</label>
+              <input value={name} onChange={(e) => setName(e.target.value)} className="mt-1 w-full rounded-lg border border-hairline bg-canvas px-4 py-2.5 text-sm text-ink outline-none focus:border-ink" />
+              <label className="mt-3 block text-sm font-semibold text-ink">Cidade</label>
+              <select value={city} onChange={(e) => setCity(e.target.value)} className="mt-1 w-full rounded-lg border border-hairline bg-canvas px-4 py-2.5 text-sm text-ink outline-none focus:border-ink">
                 {CITIES.map((c) => <option key={c}>{c}</option>)}
               </select>
-              <button onClick={saveProfile} className="mt-4 w-full rounded-xl bg-gradient-to-br from-[#ffd23f] to-[#ff8a00] py-2.5 font-bold text-[#0d0903]">Salvar alterações</button>
+              <button onClick={saveProfile} className="mt-4 w-full rounded-lg bg-primary py-2.5 font-semibold text-on-primary transition hover:bg-primary-active">Salvar alterações</button>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-[#151d33]/60 p-5">
-              <h2 className="font-display text-lg font-bold">📋 Exportar p/ WhatsApp</h2>
+            <div className="rounded-2xl border border-hairline bg-canvas p-5">
+              <h2 className="text-lg font-bold text-ink">📋 Exportar p/ WhatsApp</h2>
               <p className="mt-1 text-sm text-muted">Gera a lista de faltantes e repetidas pra compartilhar.</p>
-              <button onClick={exportText} className="mt-3 w-full rounded-xl bg-white/5 py-2.5 text-sm font-bold">💬 Copiar lista</button>
+              <button onClick={exportText} className="mt-3 w-full rounded-lg bg-surface-soft py-2.5 text-sm font-semibold text-ink transition hover:bg-surface-strong">💬 Copiar lista</button>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-[#151d33]/60 p-5">
-              <h2 className="font-display text-lg font-bold">⚡ Atalhos e testes</h2>
+            <div className="rounded-2xl border border-hairline bg-canvas p-5">
+              <h2 className="text-lg font-bold text-ink">⚡ Atalhos e testes</h2>
               <div className="mt-3 space-y-2">
-                <button onClick={() => demo("fill")} className="w-full rounded-xl bg-white/5 py-2.5 text-sm font-semibold">🎲 Preencher álbum de exemplo</button>
-                <button onClick={() => demo("neighbors")} className="w-full rounded-xl bg-white/5 py-2.5 text-sm font-semibold">👥 Criar vizinhos de demonstração</button>
-                <button onClick={() => demo("reset")} className="w-full rounded-xl border border-rose-500/30 py-2.5 text-sm font-semibold text-rose-400">Apagar coleção</button>
-                <button onClick={() => signOut({ callbackUrl: "/" })} className="w-full rounded-xl border border-white/10 py-2.5 text-sm font-semibold">Sair</button>
+                <button onClick={() => demo("fill")} className="w-full rounded-lg bg-surface-soft py-2.5 text-sm font-semibold text-ink transition hover:bg-surface-strong">🎲 Preencher álbum de exemplo</button>
+                <button onClick={() => demo("neighbors")} className="w-full rounded-lg bg-surface-soft py-2.5 text-sm font-semibold text-ink transition hover:bg-surface-strong">👥 Criar vizinhos de demonstração</button>
+                <button onClick={() => demo("reset")} className="w-full rounded-lg border border-error/40 py-2.5 text-sm font-semibold text-error transition hover:bg-error/5">Apagar coleção</button>
+                <button onClick={() => signOut({ callbackUrl: "/" })} className="w-full rounded-lg border border-hairline py-2.5 text-sm font-semibold text-ink transition hover:bg-surface-soft">Sair</button>
               </div>
             </div>
           </div>
@@ -341,10 +348,10 @@ export function AppClient({
       </main>
 
       {/* Nav inferior */}
-      <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-white/10 bg-[#0d1221]/95 backdrop-blur">
+      <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-hairline bg-canvas/95 backdrop-blur">
         <div className="mx-auto flex max-w-2xl">
           {([["album", "📒", "Álbum"], ["trade", "🔁", "Trocas"], ["meets", "📅", "Encontros"], ["profile", "👤", "Perfil"]] as const).map(([t, ic, lb]) => (
-            <button key={t} onClick={() => setTab(t)} className={`flex flex-1 flex-col items-center gap-0.5 py-3 text-xs font-semibold ${tab === t ? "text-[#ffd23f]" : "text-white/50"}`}>
+            <button key={t} onClick={() => setTab(t)} className={`flex flex-1 flex-col items-center gap-0.5 py-3 text-xs font-semibold transition ${tab === t ? "text-primary" : "text-muted"}`}>
               <span className="text-lg">{ic}</span>{lb}
             </button>
           ))}
@@ -355,47 +362,47 @@ export function AppClient({
       {detail && (
         <Modal onClose={() => setDetail(null)}>
           <div className="text-center">
-            <div className={`mx-auto flex h-44 w-32 flex-col items-center justify-center rounded-2xl ${detail.rarity === "LENDARIO" ? "bg-gradient-to-br from-[#ffd23f] to-[#ff8a00] text-black" : detail.rarity === "RARO" ? "bg-gradient-to-br from-purple-400 to-purple-700" : "bg-gradient-to-br from-cyan-400 to-cyan-700"}`}>
-              <div className="text-xs font-bold opacity-70">{RARITY_LABEL[detail.rarity]}</div>
-              <div className="font-display text-4xl font-black">{detail.number}</div>
+            <div className={`mx-auto flex h-44 w-32 flex-col items-center justify-center rounded-2xl ${RARITY_CARD[detail.rarity]}`}>
+              <div className="text-xs font-bold opacity-80">{RARITY_LABEL[detail.rarity]}</div>
+              <div className="text-4xl font-bold">{detail.number}</div>
               <div className="px-2 text-center text-sm font-bold">{detail.name}</div>
             </div>
-            <h2 className="mt-4 font-display text-xl font-bold">Figurinha #{detail.number}</h2>
+            <h2 className="mt-4 text-xl font-bold text-ink">Figurinha #{detail.number}</h2>
           </div>
           <div className="mt-4">
-            <label className="text-sm font-semibold">Estado</label>
+            <label className="text-sm font-semibold text-ink">Estado</label>
             <div className="mt-2 grid grid-cols-2 gap-2">
-              <button onClick={() => setState(detail.number, true, detail.repeated)} className={`rounded-xl py-2.5 text-sm font-bold ${detail.have ? "bg-emerald-500 text-black" : "bg-white/5"}`}>Tenho</button>
-              <button onClick={() => setState(detail.number, false, 0)} className={`rounded-xl py-2.5 text-sm font-bold ${!detail.have ? "bg-rose-500 text-white" : "bg-white/5"}`}>Falta</button>
+              <button onClick={() => setState(detail.number, true, detail.repeated)} className={`rounded-lg py-2.5 text-sm font-bold transition ${detail.have ? "bg-emerald-500 text-white" : "bg-surface-soft text-ink hover:bg-surface-strong"}`}>Tenho</button>
+              <button onClick={() => setState(detail.number, false, 0)} className={`rounded-lg py-2.5 text-sm font-bold transition ${!detail.have ? "bg-rose-500 text-white" : "bg-surface-soft text-ink hover:bg-surface-strong"}`}>Falta</button>
             </div>
           </div>
           {detail.have && (
             <div className="mt-4">
-              <label className="text-sm font-semibold">Repetidas para troca</label>
+              <label className="text-sm font-semibold text-ink">Repetidas para troca</label>
               <div className="mt-2 flex items-center justify-center gap-4">
-                <button onClick={() => setState(detail.number, true, Math.max(0, detail.repeated - 1))} className="h-10 w-10 rounded-xl bg-white/5 text-lg font-bold">—</button>
-                <span className="font-display text-2xl font-black">{detail.repeated}</span>
-                <button onClick={() => setState(detail.number, true, detail.repeated + 1)} className="h-10 w-10 rounded-xl bg-white/5 text-lg font-bold">+</button>
+                <button onClick={() => setState(detail.number, true, Math.max(0, detail.repeated - 1))} className="h-10 w-10 rounded-lg bg-surface-soft text-lg font-bold text-ink transition hover:bg-surface-strong">—</button>
+                <span className="text-2xl font-bold text-ink">{detail.repeated}</span>
+                <button onClick={() => setState(detail.number, true, detail.repeated + 1)} className="h-10 w-10 rounded-lg bg-surface-soft text-lg font-bold text-ink transition hover:bg-surface-strong">+</button>
               </div>
             </div>
           )}
-          <button onClick={() => setDetail(null)} className="mt-6 w-full rounded-xl bg-gradient-to-br from-[#ffd23f] to-[#ff8a00] py-2.5 font-bold text-[#0d0903]">Confirmar e fechar</button>
+          <button onClick={() => setDetail(null)} className="mt-6 w-full rounded-lg bg-primary py-2.5 font-semibold text-on-primary transition hover:bg-primary-active">Confirmar e fechar</button>
         </Modal>
       )}
 
       {/* Modal pacote aberto */}
       {packCards && (
         <Modal onClose={() => setPackCards(null)}>
-          <h2 className="text-center font-display text-xl font-bold">🎁 Você abriu um pacote!</h2>
+          <h2 className="text-center text-xl font-bold text-ink">🎁 Você abriu um pacote!</h2>
           <div className="mt-4 grid grid-cols-5 gap-2">
             {packCards.map((c, i) => (
-              <div key={i} className={`flex aspect-[3/4] flex-col items-center justify-center rounded-lg text-center ${c.rarity === "LENDARIO" ? "bg-gradient-to-br from-[#ffd23f] to-[#ff8a00] text-black" : c.rarity === "RARO" ? "bg-gradient-to-br from-purple-400 to-purple-700" : "bg-gradient-to-br from-cyan-500 to-cyan-800"}`}>
-                <div className="font-display text-lg font-black">{c.number}</div>
+              <div key={i} className={`flex aspect-[3/4] flex-col items-center justify-center rounded-lg text-center ${RARITY_CARD[(c.rarity as keyof typeof RARITY_CARD)] ?? RARITY_CARD.COMUM}`}>
+                <div className="text-lg font-bold">{c.number}</div>
                 <div className="text-[9px] font-bold">{c.isNew ? "NOVA!" : "repetida"}</div>
               </div>
             ))}
           </div>
-          <button onClick={() => setPackCards(null)} className="mt-5 w-full rounded-xl bg-gradient-to-br from-[#ffd23f] to-[#ff8a00] py-2.5 font-bold text-[#0d0903]">Boa!</button>
+          <button onClick={() => setPackCards(null)} className="mt-5 w-full rounded-lg bg-primary py-2.5 font-semibold text-on-primary transition hover:bg-primary-active">Boa!</button>
         </Modal>
       )}
 
@@ -409,8 +416,8 @@ export function AppClient({
 
 function Stat({ n, l, c }: { n: number; l: string; c: string }) {
   return (
-    <div className="rounded-xl bg-white/5 py-2">
-      <div className={`font-display text-xl font-black ${c}`}>{n}</div>
+    <div className="rounded-xl bg-surface-soft py-2">
+      <div className={`text-xl font-bold ${c}`}>{n}</div>
       <div className="text-[10px] text-muted">{l}</div>
     </div>
   );
@@ -418,8 +425,8 @@ function Stat({ n, l, c }: { n: number; l: string; c: string }) {
 
 function Modal({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-4 backdrop-blur sm:items-center" onClick={onClose}>
-      <div className="max-h-[88vh] w-full max-w-md overflow-y-auto rounded-2xl border border-white/10 bg-[#0d1221] p-6" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 sm:items-center" onClick={onClose}>
+      <div className="max-h-[88vh] w-full max-w-md overflow-y-auto rounded-2xl border border-hairline bg-canvas p-6 shadow-[var(--shadow-airbnb-lg)]" onClick={(e) => e.stopPropagation()}>
         {children}
       </div>
     </div>
@@ -443,27 +450,27 @@ function ScheduleModal({ match, onClose, onDone }: { match: Match; onClose: () =
   }
   return (
     <Modal onClose={onClose}>
-      <h2 className="font-display text-xl font-bold">Marcar troca com {match.name}</h2>
+      <h2 className="text-xl font-bold text-ink">Marcar troca com {match.name}</h2>
       <div className="mt-4">
-        <label className="text-sm font-semibold">📍 Ponto de troca</label>
+        <label className="text-sm font-semibold text-ink">📍 Ponto de troca</label>
         <div className="mt-2 space-y-2">
           {TRADE_POINTS.map((p) => (
-            <button key={p.nm} onClick={() => setPoint(p.nm)} className={`flex w-full items-center gap-3 rounded-xl border px-3 py-2 text-left text-sm ${point === p.nm ? "border-[#ffd23f] bg-[#ffd23f]/10" : "border-white/10 bg-white/5"}`}>
-              <span className="text-xl">{p.ic}</span><span><b>{p.nm}</b><div className="text-xs text-muted">{p.ds}</div></span>
+            <button key={p.nm} onClick={() => setPoint(p.nm)} className={`flex w-full items-center gap-3 rounded-xl border px-3 py-2 text-left text-sm transition ${point === p.nm ? "border-primary bg-primary-soft" : "border-hairline bg-canvas hover:bg-surface-soft"}`}>
+              <span className="text-xl">{p.ic}</span><span><b className="text-ink">{p.nm}</b><div className="text-xs text-muted">{p.ds}</div></span>
             </button>
           ))}
         </div>
       </div>
       <div className="mt-4">
-        <label className="text-sm font-semibold">🕐 Dia</label>
+        <label className="text-sm font-semibold text-ink">🕐 Dia</label>
         <div className="mt-2 flex flex-wrap gap-2">
-          {DAYS.map((d) => <button key={d} onClick={() => setDay(d)} className={`rounded-full px-3 py-1.5 text-xs font-semibold ${day === d ? "bg-[#ffd23f] text-black" : "bg-white/5"}`}>{d}</button>)}
+          {DAYS.map((d) => <button key={d} onClick={() => setDay(d)} className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${day === d ? "bg-ink text-white" : "bg-surface-soft text-body hover:bg-surface-strong"}`}>{d}</button>)}
         </div>
         <div className="mt-2 flex flex-wrap gap-2">
-          {TIMES.map((t) => <button key={t} onClick={() => setTime(t)} className={`rounded-full px-3 py-1.5 text-xs font-semibold ${time === t ? "bg-[#ffd23f] text-black" : "bg-white/5"}`}>{t}</button>)}
+          {TIMES.map((t) => <button key={t} onClick={() => setTime(t)} className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${time === t ? "bg-ink text-white" : "bg-surface-soft text-body hover:bg-surface-strong"}`}>{t}</button>)}
         </div>
       </div>
-      <button onClick={confirm} disabled={saving} className="mt-6 w-full rounded-xl bg-gradient-to-br from-[#ffd23f] to-[#ff8a00] py-2.5 font-bold text-[#0d0903] disabled:opacity-60">{saving ? "Confirmando…" : "Confirmar encontro"}</button>
+      <button onClick={confirm} disabled={saving} className="mt-6 w-full rounded-lg bg-primary py-2.5 font-semibold text-on-primary transition hover:bg-primary-active disabled:bg-primary-disabled">{saving ? "Confirmando…" : "Confirmar encontro"}</button>
     </Modal>
   );
 }
