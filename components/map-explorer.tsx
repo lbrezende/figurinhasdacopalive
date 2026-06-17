@@ -125,18 +125,18 @@ export default function MapExplorer({ isLoggedIn = false, userName }: { isLogged
             </button>
             <button type="submit" className="grid h-9 w-9 place-items-center rounded-full bg-primary text-on-primary transition hover:bg-primary-active">🔎</button>
           </form>
-          {/* Logo topo direito */}
-          <div className="pointer-events-auto flex items-center gap-2">
+          {/* Auth + logo topo direito — botão de login sempre visível (inclusive no mobile retrato) */}
+          <div className="pointer-events-auto flex shrink-0 items-center gap-2">
             {isLoggedIn ? (
-              <Link href="/app" className="hidden rounded-full border border-primary/30 bg-primary-soft px-4 py-2 text-sm font-semibold text-primary hover:bg-primary/10 sm:block">
-                📒 Meu álbum{userName ? ` · ${userName.split(" ")[0]}` : ""}
+              <Link href="/app" className="whitespace-nowrap rounded-full border border-primary/30 bg-primary-soft px-3 py-2 text-sm font-semibold text-primary hover:bg-primary/10 sm:px-4">
+                📒<span className="hidden sm:inline"> Meu álbum{userName ? ` · ${userName.split(" ")[0]}` : ""}</span>
               </Link>
             ) : (
-              <Link href="/login?callbackUrl=/" className="hidden rounded-full border border-hairline bg-canvas px-4 py-2 text-sm font-semibold text-ink shadow-[var(--shadow-airbnb)] hover:bg-surface-soft sm:block">
+              <Link href="/login?callbackUrl=/" className="whitespace-nowrap rounded-full border border-hairline bg-canvas px-4 py-2 text-sm font-semibold text-ink shadow-[var(--shadow-airbnb)] hover:bg-surface-soft">
                 Entrar
               </Link>
             )}
-            <Link href="/" className="flex items-center gap-2 rounded-full border border-hairline bg-canvas px-3 py-2 text-sm font-bold text-ink shadow-[var(--shadow-airbnb)]">
+            <Link href="/" className="hidden items-center gap-2 rounded-full border border-hairline bg-canvas px-3 py-2 text-sm font-bold text-ink shadow-[var(--shadow-airbnb)] sm:flex">
               <span className="grid h-7 w-7 place-items-center rounded-lg bg-primary text-sm">⚽</span>
               <span className="hidden sm:block">Figura Certa</span>
             </Link>
