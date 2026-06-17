@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MapSection } from "@/components/map-section";
+import { MapExplorerSection } from "@/components/map-explorer-section";
 
 const FEATURES = [
   { icon: "📒", title: "Controle total do álbum", desc: "Marque o que você tem e o que está repetida em um toque. O app calcula o que falta em tempo real." },
@@ -19,23 +19,8 @@ const STEPS = [
 export default function Home() {
   return (
     <div className="flex min-h-screen flex-col">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-[#070a13]/70 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-          <div className="flex items-center gap-2.5 font-display text-lg font-extrabold">
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-[#ffd23f] to-[#ff8a00] text-base shadow-lg shadow-[#ffd23f]/30">
-              ⚽
-            </span>
-            Figura Certa
-          </div>
-          <Link
-            href="/login"
-            className="rounded-xl border border-white/10 px-5 py-2.5 text-sm font-bold transition hover:bg-white/5"
-          >
-            Fazer login
-          </Link>
-        </div>
-      </header>
+      {/* Mapa de trocas em tela cheia (primeiro contato) */}
+      <MapExplorerSection />
 
       {/* Hero */}
       <section className="relative px-6 pt-20 pb-14 text-center">
@@ -70,9 +55,6 @@ export default function Home() {
           <p className="mt-4 text-sm text-muted">14 dias grátis · Sem cartão pra começar</p>
         </div>
       </section>
-
-      {/* Mapa de trocas */}
-      <MapSection />
 
       {/* Features */}
       <section className="px-6 py-16">
