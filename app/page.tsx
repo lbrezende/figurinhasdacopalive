@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { MapSection } from "@/components/map-section";
 
 const FEATURES = [
   { icon: "📒", title: "Controle total do álbum", desc: "Marque o que você tem e o que está repetida em um toque. O app calcula o que falta em tempo real." },
@@ -69,6 +70,9 @@ export default function Home() {
           <p className="mt-4 text-sm text-muted">14 dias grátis · Sem cartão pra começar</p>
         </div>
       </section>
+
+      {/* Mapa de trocas */}
+      <MapSection />
 
       {/* Features */}
       <section className="px-6 py-16">
