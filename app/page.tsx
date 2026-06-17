@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { auth } from "@/lib/auth";
+import { MapExplorerSection } from "@/components/map-explorer-section";
 
 const FEATURES = [
   { icon: "📒", title: "Controle total do álbum", desc: "Marque o que você tem e o que está repetida em um toque. O app calcula o que falta em tempo real." },
@@ -15,26 +17,16 @@ const STEPS = [
   { n: "3", title: "Receba os matches", desc: "Veja quem perto de você fecha a troca e marque o encontro." },
 ];
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  const session = await auth();
+  const isLoggedIn = !!session?.user;
+
   return (
     <div className="flex min-h-screen flex-col">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-[#070a13]/70 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-          <div className="flex items-center gap-2.5 font-display text-lg font-extrabold">
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-[#ffd23f] to-[#ff8a00] text-base shadow-lg shadow-[#ffd23f]/30">
-              ⚽
-            </span>
-            Figura Certa
-          </div>
-          <Link
-            href="/login"
-            className="rounded-xl border border-white/10 px-5 py-2.5 text-sm font-bold transition hover:bg-white/5"
-          >
-            Fazer login
-          </Link>
-        </div>
-      </header>
+      {/* Mapa de trocas em tela cheia (primeiro contato) */}
+      <MapExplorerSection isLoggedIn={isLoggedIn} userName={session?.user?.name ?? null} />
 
       {/* Hero */}
       <section className="relative px-6 pt-20 pb-14 text-center">

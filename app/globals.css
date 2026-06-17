@@ -29,3 +29,8 @@ body {
 h1, h2, h3 {
   font-family: var(--font-outfit), system-ui, sans-serif;
 }
+
+/* Mapa: deixa os tiles claros do OpenStreetMap com aparência dark */
+.map-tiles-dark {
+  filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.9) saturate(0.85);
+}
