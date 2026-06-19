@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { MapExplorerSection } from "@/components/map-explorer-section";
+import { LiveReminderModal } from "@/components/live-reminder-modal";
 
 const FEATURES = [
   { icon: "📒", title: "Controle total do álbum", desc: "Marque o que você tem e o que está repetida em um toque. O app calcula o que falta em tempo real." },
@@ -25,6 +26,9 @@ export default async function Home() {
 
   return (
     <div className="flex min-h-screen flex-col bg-canvas">
+      {/* Lembrete da próxima live (modal dismissível) */}
+      <LiveReminderModal />
+
       {/* Mapa de trocas em tela cheia (primeiro contato) */}
       <MapExplorerSection isLoggedIn={isLoggedIn} userName={session?.user?.name ?? null} />
 
