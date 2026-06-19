@@ -2,7 +2,7 @@
 
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { MapContainer, TileLayer, Marker, ZoomControl, useMap } from "react-leaflet";
 import { TRADE_POINTS, traderInitials, type TradePoint } from "@/lib/map-points";
@@ -84,6 +84,70 @@ export default function MapExplorer({ isLoggedIn = false, userName }: { isLogged
   const [geoMsg, setGeoMsg] = useState<string | null>(null);
   const [selected, setSelected] = useState<TradePoint | null>(null);
 
+  // --- Autocomplete (Google Places via /api/places) ---
+  type Suggestion = { placeId: string; description: string };
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const sessionRef = useRef<string | null>(null);
+  const skipFetchRef = useRef(false); // evita re-buscar após escolher uma sugestão
+
+  function newSession() {
+    sessionRef.current =
+      typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : String(Date.now());
+  }
+
+  useEffect(() => {
+    if (skipFetchRef.current) {
+      skipFetchRef.current = false;
+      return;
+    }
+    const q = address.trim();
+    if (q.length < 3) {
+      setSuggestions([]);
+      return;
+    }
+    if (!sessionRef.current) newSession();
+    const ctrl = new AbortController();
+    const t = setTimeout(async () => {
+      try {
+        const r = await fetch(
+          `/api/places?q=${encodeURIComponent(q)}&session=${sessionRef.current}`,
+          { signal: ctrl.signal },
+        );
+        const j = await r.json();
+        setSuggestions(j.suggestions ?? []);
+        setShowSuggestions(true);
+      } catch {
+        /* abortado ou offline — ignora */
+      }
+    }, 250);
+    return () => {
+      clearTimeout(t);
+      ctrl.abort();
+    };
+  }, [address]);
+
+  async function pickSuggestion(s: Suggestion) {
+    skipFetchRef.current = true;
+    setAddress(s.description);
+    setShowSuggestions(false);
+    setSuggestions([]);
+    setGeoMsg("Buscando endereço…");
+    try {
+      const r = await fetch(`/api/places?id=${encodeURIComponent(s.placeId)}&session=${sessionRef.current}`);
+      const j = await r.json();
+      if (j.lat != null) {
+        setCenter([j.lat, j.lng]);
+        setYouAt([j.lat, j.lng]);
+        setGeoMsg(null);
+      } else setGeoMsg("Não consegui localizar esse endereço.");
+    } catch {
+      setGeoMsg("Não consegui buscar agora.");
+    } finally {
+      sessionRef.current = null; // sessão de billing encerra ao escolher
+    }
+  }
+
   function toggleNum(n: number) {
     setWanted((w) => (w.includes(n) ? w.filter((x) => x !== n) : [...w, n]));
   }
@@ -96,6 +160,11 @@ export default function MapExplorer({ isLoggedIn = false, userName }: { isLogged
   async function searchAddress(e?: React.FormEvent) {
     e?.preventDefault();
     if (!address.trim()) return;
+    // Se há sugestões do Google, usa a primeira (mais relevante).
+    if (suggestions.length > 0) {
+      await pickSuggestion(suggestions[0]);
+      return;
+    }
     setGeoMsg("Buscando endereço…");
     try {
       const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(address)}`);
@@ -150,12 +219,34 @@ export default function MapExplorer({ isLoggedIn = false, userName }: { isLogged
         <div className="pointer-events-auto mx-auto flex max-w-6xl items-center gap-3">
           <form onSubmit={searchAddress} className="flex flex-1 items-center gap-2 rounded-full border border-hairline bg-canvas px-2 py-1.5 shadow-[var(--shadow-airbnb)]">
             <span className="pl-2 text-ink">📍</span>
-            <input
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              placeholder="Digite seu endereço ou cidade…"
-              className="min-w-0 flex-1 bg-transparent text-sm text-ink outline-none placeholder:text-muted-soft"
-            />
+            <div className="relative min-w-0 flex-1">
+              <input
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                onFocus={() => suggestions.length && setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                placeholder="Digite seu endereço ou cidade…"
+                autoComplete="off"
+                className="w-full bg-transparent text-sm text-ink outline-none placeholder:text-muted-soft"
+              />
+              {showSuggestions && suggestions.length > 0 && (
+                <ul className="absolute left-0 right-0 top-[calc(100%+0.75rem)] z-[600] max-h-72 overflow-y-auto rounded-2xl border border-hairline bg-canvas py-1.5 shadow-[var(--shadow-airbnb-lg)]">
+                  {suggestions.map((s) => (
+                    <li key={s.placeId}>
+                      <button
+                        type="button"
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => pickSuggestion(s)}
+                        className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-body transition hover:bg-surface-soft"
+                      >
+                        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-surface-soft text-muted">📍</span>
+                        <span className="truncate">{s.description}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
             <button type="button" onClick={useMyLocation} className="hidden whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold text-muted hover:bg-surface-soft sm:block">
               Perto de mim
             </button>
