@@ -7,6 +7,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(db),
   session: { strategy: "jwt" },
   pages: { signIn: "/login" },
+  logger: {
+    // Cookie de sessão antigo/assinado com outra AUTH_SECRET não descriptografa:
+    // o Auth.js já trata como "deslogado", então não poluímos o console (nem o
+    // overlay de erro do Next em dev) com esse caso benigno.
+    error(error) {
+      if (error?.name === "JWTSessionError") return;
+      console.error(error);
+    },
+  },
   providers: [
     Google({
       allowDangerousEmailAccountLinking: true,
