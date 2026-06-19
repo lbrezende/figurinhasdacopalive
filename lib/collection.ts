@@ -102,6 +102,30 @@ export async function setOwnership(
   await db.collection.update({ where: { id: collectionId }, data: { updatedAt: new Date() } });
 }
 
+/**
+ * Marca uma figurinha como obtida. Se já tinha, incrementa as repetidas.
+ * Retorna `{ isNew }` (true = primeira vez) ou null se o número não existe.
+ */
+export async function addOwnedByNumber(
+  collectionId: string,
+  albumId: string,
+  number: number
+): Promise<{ isNew: boolean } | null> {
+  const sticker = await db.sticker.findUnique({ where: { albumId_number: { albumId, number } } });
+  if (!sticker) return null;
+  const cur = await db.stickerOwnership.findUnique({
+    where: { collectionId_stickerId: { collectionId, stickerId: sticker.id } },
+  });
+  const isNew = !cur || !cur.have;
+  await db.stickerOwnership.upsert({
+    where: { collectionId_stickerId: { collectionId, stickerId: sticker.id } },
+    update: isNew ? { have: true } : { repeated: { increment: 1 } },
+    create: { collectionId, stickerId: sticker.id, number, have: true, repeated: 0 },
+  });
+  await db.collection.update({ where: { id: collectionId }, data: { updatedAt: new Date() } });
+  return { isNew };
+}
+
 /** Tap cíclico: Falta → Tenho → Repetida → Falta. */
 export async function cycleOwnership(collectionId: string, albumId: string, number: number) {
   const { stickerId } = await ownershipRef(collectionId, albumId, number);

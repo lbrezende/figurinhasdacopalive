@@ -5,6 +5,7 @@ import { signOut } from "next-auth/react";
 import { toast } from "sonner";
 import { CITIES, TRADE_POINTS, DAYS, TIMES } from "@/lib/cities";
 import { TEAM_ORDER, teamStyle, idealText, darken, fakePhoto } from "@/lib/teams";
+import { AddStickersCard } from "@/components/add-stickers-card";
 
 type Kind = "SPECIAL" | "BADGE" | "PHOTO" | "PLAYER" | null;
 type Cell = {
@@ -268,6 +269,9 @@ export function AppClient({
                 </div>
               </div>
             </div>
+
+            {/* adicionar figurinhas (texto / voz / foto via OpenAI) */}
+            <AddStickersCard onAdded={(c) => { setCounts(c); refreshGrid(); }} />
 
             {/* busca + filtros */}
             <div className="rounded-2xl border border-hairline bg-canvas p-4">
