@@ -25,6 +25,18 @@ function codesFrom(out: Record<string, unknown>): string[] {
   return raw.map((c) => String(c).trim()).filter(Boolean);
 }
 
+/** Estrutura uma transcrição (texto livre) em lista de códigos. */
+async function codesFromTranscript(transcript: string): Promise<string[]> {
+  const messages: ChatMessage[] = [
+    { role: "system", content: SYSTEM },
+    {
+      role: "user",
+      content: `O usuário ditou as figurinhas que possui. Transcrição: "${transcript}". Extraia os códigos.`,
+    },
+  ];
+  return codesFrom(await chatJSON(TEXT_MODEL, messages));
+}
+
 export async function POST(req: Request) {
   const user = await currentUser();
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
@@ -42,16 +54,17 @@ export async function POST(req: Request) {
       const file = form.get("audio");
       if (!(file instanceof File)) return NextResponse.json({ error: "áudio ausente" }, { status: 400 });
       const buf = Buffer.from(await file.arrayBuffer());
+      // 1) transcreve todo o áudio  2) estrutura a transcrição em códigos
       const transcript = await transcribe(buf, file.name || "audio.webm", file.type || "audio/webm");
-      const messages: ChatMessage[] = [
-        { role: "system", content: SYSTEM },
-        {
-          role: "user",
-          content: `O usuário ditou as figurinhas que possui. Transcrição: "${transcript}". Extraia os códigos.`,
-        },
-      ];
-      const out = await chatJSON(TEXT_MODEL, messages);
-      return NextResponse.json({ codes: codesFrom(out), transcript });
+      const codes = transcript.trim() ? await codesFromTranscript(transcript) : [];
+      return NextResponse.json({ codes, transcript });
+    }
+
+    if (kind === "text") {
+      const transcript = String(form.get("transcript") ?? "").trim();
+      if (!transcript) return NextResponse.json({ error: "texto ausente" }, { status: 400 });
+      const codes = await codesFromTranscript(transcript);
+      return NextResponse.json({ codes, transcript });
     }
 
     if (kind === "image") {

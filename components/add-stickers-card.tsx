@@ -4,20 +4,32 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 
 type Counts = { have: number; miss: number; rep: number; total: number; pct: number };
-type Busy = null | "add" | "voice" | "photo";
+type Busy = null | "add" | "voice" | "photo" | "reextract";
+
+/** Junta tokens existentes + novos, removendo duplicados (ARG 17 == arg17). */
+function mergeCodes(existing: string, add: string[]): string {
+  const norm = (s: string) => s.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  const out: string[] = [];
+  const seen = new Set<string>();
+  for (const tok of [...existing.split(/[\n,;]+/), ...add]) {
+    const t = tok.trim();
+    if (!t) continue;
+    const k = norm(t);
+    if (!k || seen.has(k)) continue;
+    seen.add(k);
+    out.push(t);
+  }
+  return out.join(", ");
+}
 
 export function AddStickersCard({ onAdded }: { onAdded?: (counts: Counts) => void }) {
   const [text, setText] = useState("");
+  const [transcript, setTranscript] = useState("");
   const [busy, setBusy] = useState<Busy>(null);
   const [recording, setRecording] = useState(false);
   const mediaRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
-
-  function appendCodes(codes: string[]) {
-    const joined = codes.join(", ");
-    setText((prev) => (prev.trim() ? `${prev.trim()}, ${joined}` : joined));
-  }
 
   /* ---------- adicionar ao álbum ---------- */
   async function add() {
@@ -46,6 +58,7 @@ export function AddStickersCard({ onAdded }: { onAdded?: (counts: Counts) => voi
       toast(parts.length ? `Adicionado: ${parts.join(" · ")} ✅` : "Nada novo pra adicionar");
       if (nf.length) toast(`Não reconheci: ${nf.join(", ")}`);
       setText("");
+      setTranscript("");
       if (r.counts) onAdded?.(r.counts);
     } catch {
       toast("Falha ao adicionar");
@@ -93,15 +106,37 @@ export function AddStickersCard({ onAdded }: { onAdded?: (counts: Counts) => voi
         toast(`Erro: ${r.error}`);
         return;
       }
+      setTranscript(r.transcript ?? "");
       const codes: string[] = r.codes ?? [];
-      if (!codes.length) {
-        toast("Não identifiquei figurinhas na fala");
-        return;
-      }
-      appendCodes(codes);
-      toast(`Ouvi: ${codes.join(", ")} 🎤`);
+      setText((prev) => mergeCodes(prev, codes));
+      if (!codes.length) toast("Transcrevi, mas não identifiquei figurinhas. Edite o texto e re-extraia. ✍️");
+      else toast(`Identifiquei ${codes.length} figurinha${codes.length > 1 ? "s" : ""} 🎤`);
     } catch {
       toast("Falha ao processar o áudio");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  /** Re-extrai os códigos a partir da transcrição editada (substitui a lista). */
+  async function reextract() {
+    const value = transcript.trim();
+    if (!value) return;
+    setBusy("reextract");
+    try {
+      const form = new FormData();
+      form.append("kind", "text");
+      form.append("transcript", value);
+      const r = await fetch("/api/stickers/extract", { method: "POST", body: form }).then((res) => res.json());
+      if (r.error) {
+        toast(`Erro: ${r.error}`);
+        return;
+      }
+      const codes: string[] = r.codes ?? [];
+      setText(mergeCodes("", codes));
+      toast(codes.length ? `Re-extraído: ${codes.join(", ")} ✅` : "Não identifiquei figurinhas no texto");
+    } catch {
+      toast("Falha ao re-extrair");
     } finally {
       setBusy(null);
     }
@@ -127,7 +162,7 @@ export function AddStickersCard({ onAdded }: { onAdded?: (counts: Counts) => voi
         toast("Não encontrei códigos na foto 📸");
         return;
       }
-      appendCodes(codes);
+      setText((prev) => mergeCodes(prev, codes));
       toast(`Li ${codes.length} figurinha${codes.length > 1 ? "s" : ""} da foto 📸`);
     } catch {
       toast("Falha ao processar a foto");
@@ -136,6 +171,8 @@ export function AddStickersCard({ onAdded }: { onAdded?: (counts: Counts) => voi
     }
   }
 
+  const anyBusy = !!busy;
+
   return (
     <div className="rounded-2xl border border-hairline bg-canvas p-5">
       <div className="flex items-center gap-4">
@@ -143,43 +180,88 @@ export function AddStickersCard({ onAdded }: { onAdded?: (counts: Counts) => voi
         <div className="flex-1">
           <h3 className="font-bold text-ink">Adicionar figurinhas</h3>
           <p className="text-xs text-muted">
-            Digite os códigos (ex: <b className="text-body">ARG17, BRA10</b>), dite por voz 🎤 ou envie uma foto 📸.
+            Dite por voz 🎤, envie uma foto 📸 ou digite os códigos (ex: <b className="text-body">ARG17, BRA10</b>).
           </p>
         </div>
       </div>
 
-      {/* campo de texto + microfone */}
-      <div className="relative mt-3">
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          rows={2}
-          placeholder="ARG17, BRA10, FWC2…"
-          className="w-full resize-none rounded-xl border border-hairline bg-surface-soft px-3 py-2.5 pr-14 text-sm text-ink outline-none focus:border-ink placeholder:text-muted-soft"
-        />
-        <button
-          type="button"
-          onClick={toggleRecord}
-          disabled={busy === "add" || busy === "photo"}
-          title={recording ? "Parar e processar" : "Ditar por voz"}
-          aria-label={recording ? "Parar gravação" : "Ditar por voz"}
-          className={`absolute right-2 top-2 grid h-10 w-10 place-items-center rounded-full transition disabled:opacity-40 ${
-            recording
-              ? "animate-pulse bg-primary text-on-primary"
-              : "bg-surface-strong text-ink hover:bg-ink hover:text-white"
-          }`}
-        >
-          {busy === "voice" ? <Spinner /> : <MicIcon />}
-        </button>
+      {/* ---- Transcrição (aparece após gravar) ---- */}
+      {transcript && (
+        <div className="mt-4 rounded-xl border border-hairline bg-surface-soft p-3">
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-bold uppercase tracking-wide text-muted">🎤 Transcrição</label>
+            <button
+              type="button"
+              onClick={() => setTranscript("")}
+              className="text-xs text-muted underline hover:text-ink"
+            >
+              descartar
+            </button>
+          </div>
+          <textarea
+            value={transcript}
+            onChange={(e) => setTranscript(e.target.value)}
+            rows={2}
+            placeholder="O que você falou aparece aqui…"
+            className="mt-2 w-full resize-none rounded-lg border border-hairline bg-canvas px-3 py-2 text-sm text-ink outline-none focus:border-ink"
+          />
+          <div className="mt-2 flex items-center justify-between gap-2">
+            <p className="text-[11px] text-muted">Corrigiu algum número? Re-extraia a lista do texto.</p>
+            <button
+              type="button"
+              onClick={reextract}
+              disabled={anyBusy}
+              className="shrink-0 rounded-lg bg-surface-strong px-3 py-1.5 text-xs font-semibold text-ink transition hover:bg-ink hover:text-white disabled:opacity-50"
+            >
+              {busy === "reextract" ? "Re-extraindo…" : "↻ Re-extrair"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ---- Figurinhas identificadas (campo editável) + microfone ---- */}
+      <div className="mt-4">
+        <div className="mb-1.5 flex items-center justify-between">
+          <label className="text-xs font-bold uppercase tracking-wide text-muted">Figurinhas identificadas</label>
+          {text.trim() && (
+            <button type="button" onClick={() => setText("")} className="text-xs text-muted underline hover:text-ink">
+              limpar
+            </button>
+          )}
+        </div>
+        <div className="relative">
+          <textarea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            rows={2}
+            placeholder="ARG17, BRA10, FWC2…"
+            className="w-full resize-none rounded-xl border border-hairline bg-surface-soft px-3 py-2.5 pr-14 text-sm text-ink outline-none focus:border-ink placeholder:text-muted-soft"
+          />
+          <button
+            type="button"
+            onClick={toggleRecord}
+            disabled={busy === "add" || busy === "photo" || busy === "reextract"}
+            title={recording ? "Parar e processar" : "Ditar por voz"}
+            aria-label={recording ? "Parar gravação" : "Ditar por voz"}
+            className={`absolute right-2 top-2 grid h-10 w-10 place-items-center rounded-full transition disabled:opacity-40 ${
+              recording
+                ? "animate-pulse bg-primary text-on-primary"
+                : "bg-surface-strong text-ink hover:bg-ink hover:text-white"
+            }`}
+          >
+            {busy === "voice" ? <Spinner /> : <MicIcon />}
+          </button>
+        </div>
+        <p className="mt-1 text-[11px] text-muted">Edite aqui se a IA entendeu algum número errado.</p>
       </div>
 
-      {/* ações */}
+      {/* ---- ações ---- */}
       <div className="mt-3 flex items-center gap-2">
         <input ref={fileRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={onPhoto} />
         <button
           type="button"
           onClick={() => fileRef.current?.click()}
-          disabled={!!busy}
+          disabled={anyBusy}
           className="flex items-center gap-1.5 rounded-lg border border-hairline bg-surface-soft px-3 py-2 text-sm font-semibold text-ink transition hover:bg-surface-strong disabled:opacity-50"
         >
           {busy === "photo" ? "Lendo foto…" : "📷 Enviar foto"}
@@ -187,7 +269,7 @@ export function AddStickersCard({ onAdded }: { onAdded?: (counts: Counts) => voi
         <button
           type="button"
           onClick={add}
-          disabled={!!busy}
+          disabled={anyBusy}
           className="ml-auto rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-on-primary transition hover:bg-primary-active disabled:bg-primary-disabled"
         >
           {busy === "add" ? "Adicionando…" : "Adicionar ao álbum"}
