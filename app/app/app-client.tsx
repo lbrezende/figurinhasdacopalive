@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { CITIES, TRADE_POINTS, DAYS, TIMES } from "@/lib/cities";
 import { TEAM_ORDER, teamStyle, idealText, darken, fakePhoto } from "@/lib/teams";
 import { AddStickersCard } from "@/components/add-stickers-card";
+import { AlbumIcon, TrocasIcon, EncontrosIcon, PerfilIcon } from "@/components/ui/nav-icons";
 
 type Kind = "SPECIAL" | "BADGE" | "PHOTO" | "PLAYER" | null;
 type Cell = {
@@ -468,9 +469,9 @@ export function AppClient({
       {/* Nav inferior */}
       <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-hairline bg-canvas/95 backdrop-blur">
         <div className="mx-auto flex max-w-2xl">
-          {([["album", "📒", "Álbum"], ["trade", "🔁", "Trocas"], ["meets", "📅", "Encontros"], ["profile", "👤", "Perfil"]] as const).map(([t, ic, lb]) => (
+          {([["album", AlbumIcon, "Álbum"], ["trade", TrocasIcon, "Trocas"], ["meets", EncontrosIcon, "Encontros"], ["profile", PerfilIcon, "Perfil"]] as const).map(([t, Ic, lb]) => (
             <button key={t} onClick={() => setTab(t)} className={`flex flex-1 flex-col items-center gap-0.5 py-3 text-xs font-semibold transition ${tab === t ? "text-primary" : "text-muted"}`}>
-              <span className="text-lg">{ic}</span>{lb}
+              <Ic />{lb}
             </button>
           ))}
         </div>

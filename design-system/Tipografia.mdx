@@ -1,0 +1,21 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { TYPE_SCALE } from "./tokens";
+
+<Meta title="Design System/Tipografia" />
+
+# Tipografia
+
+Fonte: **Inter** (substituto open-source do Cereal VF do Airbnb), via `next/font`
+na var `--font-inter` → classe `font-sans`. Títulos (`h1–h3`) usam
+`letter-spacing: -0.02em`. Pesos de display modestos (500–900).
+
+<div style={{ marginTop: 12 }}>
+  {TYPE_SCALE.map((t) => (
+    <div key={t.name} style={{ padding: "12px 0", borderBottom: "1px solid #ebebeb" }}>
+      <div className={t.cls}>{t.name} — A gente acha por você</div>
+      <div style={{ fontSize: 12, color: "#6a6a6a", marginTop: 4 }}>
+        <code>{t.cls}</code> — {t.use}
+      </div>
+    </div>
+  ))}
+</div>

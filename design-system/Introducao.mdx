@@ -1,0 +1,30 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Design System/Introdução" />
+
+# Figura Certa — Design System
+
+Sistema de design inspirado no **Airbnb** (referência: `airbnb/DESIGN.md`).
+Os tokens vivem em `app/globals.css` (`@theme`) e são documentados aqui a partir de
+`design-system/tokens.ts`.
+
+## Princípios
+
+- **Tema claro, sem dark mode.** Canvas branco; tinta `#222` (`text-ink`) — nunca preto puro.
+- **Voltage único = Rausch** (`#ff385c`). Usado com parcimônia: só CTAs primários, orb de
+  busca, marcador ativo do mapa e nav ativa. **Sem gradientes** (exceto artes "WE ARE").
+- **Tokens semânticos sempre.** Use `bg-canvas`, `text-ink`, `border-hairline`… nunca hex
+  literais ou `white/10`.
+- **Elevação de um tier só** — `shadow-airbnb` (e `shadow-airbnb-lg` para modais). 95% das
+  superfícies são flat com `border-hairline`.
+- **Raios:** botões `rounded-lg` (8px) · cards `rounded-2xl` · pílulas/chips/search `rounded-full`.
+- **Seleção/toggle:** ativo = `bg-ink text-white`; inativo = `bg-surface-soft text-body`.
+
+## Estrutura
+
+- **Design System** → tokens (Cores, Tipografia, Bordas & Raios, Sombras, Espaçamentos).
+- **Primitivos** → Button, FilterPill, Tabs, BottomNav, Input, SearchField, Modal, ActionSheet.
+- **Domínio** → Upload, Álbum, Mapa, Pesquisa.
+
+Todos os componentes vivem em `components/ui/` e são consumidos pelas telas reais
+(`app/page.tsx`, `app/app/app-client.tsx`, `components/add-stickers-card.tsx`).

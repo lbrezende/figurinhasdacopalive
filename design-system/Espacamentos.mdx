@@ -1,0 +1,19 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { SPACING } from "./tokens";
+
+<Meta title="Design System/Espaçamentos" />
+
+# Espaçamentos
+
+Escala Tailwind (base **4px**). Abaixo, os passos efetivamente usados nas telas.
+
+<div style={{ marginTop: 16 }}>
+  {SPACING.map((s) => (
+    <div key={s.name} style={{ display: "flex", alignItems: "center", gap: 16, padding: "6px 0" }}>
+      <div style={{ width: 70, fontSize: 13, color: "#222", fontWeight: 700 }}><code>{s.name}</code></div>
+      <div style={{ width: 70, fontSize: 12, color: "#6a6a6a" }}>{s.px}</div>
+      <div style={{ height: 16, width: s.px, background: "#ff385c", borderRadius: 3 }} />
+      <div style={{ fontSize: 12, color: "#6a6a6a" }}>{s.use}</div>
+    </div>
+  ))}
+</div>

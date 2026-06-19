@@ -1,0 +1,45 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { SURFACES, INK, BORDERS, BRAND, SEMANTIC, COLLECTION_STATES } from "./tokens";
+
+<Meta title="Design System/Cores" />
+
+export const Swatch = ({ hex, name, cssVar, use, tw }) => (
+  <div style={{ display: "flex", gap: 12, alignItems: "center", padding: "8px 0", borderBottom: "1px solid #ebebeb" }}>
+    <div style={{ width: 44, height: 44, borderRadius: 10, background: hex, border: "1px solid #ddd", flexShrink: 0 }} />
+    <div style={{ minWidth: 0 }}>
+      <div style={{ fontWeight: 700, color: "#222" }}>{name}</div>
+      <div style={{ fontSize: 12, color: "#6a6a6a" }}>
+        <code>{tw ? tw : cssVar}</code> · {hex} — {use}
+      </div>
+    </div>
+  </div>
+);
+
+export const Group = ({ items }) => (
+  <div style={{ marginTop: 8 }}>{items.map((c) => <Swatch key={c.name} {...c} />)}</div>
+);
+
+# Cores
+
+Decisões: **canvas branco**, **tinta `#222`** (nunca preto puro) e **um voltage único (Rausch)**
+usado com parcimônia. Sem dark mode.
+
+## Superfícies
+<Group items={SURFACES} />
+
+## Tinta / Texto
+<Group items={INK} />
+
+## Bordas (hairlines)
+<Group items={BORDERS} />
+
+## Marca — Rausch (use com parcimônia)
+Só em CTAs primários, orb de busca, marcador ativo do mapa e nav ativa.
+<Group items={BRAND} />
+
+## Semânticos
+<Group items={SEMANTIC} />
+
+## Estados de coleção (domínio)
+Exceção semântica ao voltage único — comunicam o estado da figurinha.
+<Group items={COLLECTION_STATES} />

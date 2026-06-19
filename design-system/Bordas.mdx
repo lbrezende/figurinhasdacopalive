@@ -1,0 +1,19 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { RADII } from "./tokens";
+
+<Meta title="Design System/Bordas & Raios" />
+
+# Bordas & Raios
+
+Borda padrão: **1px `border-hairline`** (`#ddd`). Foco de input: `focus:border-ink`
+(sem ring/glow). Raios por tipo de superfície:
+
+<div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: 16, marginTop: 16 }}>
+  {RADII.map((r) => (
+    <div key={r.name} style={{ textAlign: "center" }}>
+      <div style={{ height: 80, background: "#f7f7f7", border: "1px solid #ddd", borderRadius: r.value.split("–")[0].replace("px", "") + "px" }} />
+      <div style={{ fontWeight: 700, color: "#222", marginTop: 8, fontSize: 13 }}><code>{r.name}</code></div>
+      <div style={{ fontSize: 12, color: "#6a6a6a" }}>{r.value} — {r.use}</div>
+    </div>
+  ))}
+</div>

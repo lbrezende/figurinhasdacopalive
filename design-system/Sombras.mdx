@@ -1,0 +1,19 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { SHADOWS } from "./tokens";
+
+<Meta title="Design System/Sombras" />
+
+# Sombras (Elevação)
+
+Airbnb usa essencialmente **um único tier** de elevação. 95% das superfícies são flat
+com `border-hairline`; só cards flutuantes e modais recebem sombra.
+
+<div style={{ display: "flex", gap: 32, flexWrap: "wrap", marginTop: 24, padding: 16 }}>
+  {SHADOWS.map((s) => (
+    <div key={s.name} style={{ textAlign: "center" }}>
+      <div style={{ width: 200, height: 110, background: "#fff", borderRadius: 16, boxShadow: s.value }} />
+      <div style={{ fontWeight: 700, color: "#222", marginTop: 14, fontSize: 13 }}><code>{s.name}</code></div>
+      <div style={{ fontSize: 12, color: "#6a6a6a", maxWidth: 200 }}>{s.use}</div>
+    </div>
+  ))}
+</div>

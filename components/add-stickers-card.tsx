@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import { toast } from "sonner";
 
 type Counts = { have: number; miss: number; rep: number; total: number; pct: number };
@@ -22,6 +23,8 @@ function mergeCodes(existing: string, add: string[]): string {
   return out.join(", ");
 }
 
+const PHOTO_SPRING = { type: "spring" as const, duration: 0.5, bounce: 0.18 };
+
 export function AddStickersCard({ onAdded }: { onAdded?: (counts: Counts) => void }) {
   const [text, setText] = useState("");
   const [transcript, setTranscript] = useState("");
@@ -29,7 +32,30 @@ export function AddStickersCard({ onAdded }: { onAdded?: (counts: Counts) => voi
   const [recording, setRecording] = useState(false);
   const mediaRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
-  const fileRef = useRef<HTMLInputElement>(null);
+
+  // --- foto: fontes (câmera/galeria) + preview animado ---
+  const cameraRef = useRef<HTMLInputElement>(null);
+  const galleryRef = useRef<HTMLInputElement>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [isTouch, setIsTouch] = useState(false);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const photoUrlRef = useRef<string | null>(null);
+  photoUrlRef.current = photoUrl;
+
+  useEffect(() => {
+    setIsTouch(typeof window !== "undefined" && !!window.matchMedia?.("(pointer: coarse)").matches);
+    // revoga a URL temporária da foto ao desmontar
+    return () => {
+      if (photoUrlRef.current) URL.revokeObjectURL(photoUrlRef.current);
+    };
+  }, []);
+
+  function closePhoto() {
+    setPreviewOpen(false);
+    if (photoUrl) URL.revokeObjectURL(photoUrl);
+    setPhotoUrl(null);
+  }
 
   /* ---------- adicionar ao álbum ---------- */
   async function add() {
@@ -59,6 +85,7 @@ export function AddStickersCard({ onAdded }: { onAdded?: (counts: Counts) => voi
       if (nf.length) toast(`Não reconheci: ${nf.join(", ")}`);
       setText("");
       setTranscript("");
+      closePhoto();
       if (r.counts) onAdded?.(r.counts);
     } catch {
       toast("Falha ao adicionar");
@@ -143,10 +170,21 @@ export function AddStickersCard({ onAdded }: { onAdded?: (counts: Counts) => voi
   }
 
   /* ---------- foto ---------- */
+  function pickPhoto() {
+    if (anyBusy) return;
+    // No celular oferecemos a escolha nativa (câmera x galeria); no desktop, abre direto o seletor.
+    if (isTouch) setSheetOpen(true);
+    else galleryRef.current?.click();
+  }
+
   async function onPhoto(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
+    // Pré-visualização imediata enquanto a IA processa
+    if (photoUrl) URL.revokeObjectURL(photoUrl);
+    setPhotoUrl(URL.createObjectURL(file));
+    setPreviewOpen(true);
     setBusy("photo");
     try {
       const form = new FormData();
@@ -253,14 +291,40 @@ export function AddStickersCard({ onAdded }: { onAdded?: (counts: Counts) => voi
           </button>
         </div>
         <p className="mt-1 text-[11px] text-muted">Edite aqui se a IA entendeu algum número errado.</p>
+
+        {/* Thumbnail minimizado da foto — aparece logo abaixo do campo */}
+        {photoUrl && !previewOpen && (
+          <motion.button
+            type="button"
+            onClick={() => setPreviewOpen(true)}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            title="Ampliar foto"
+            className="mt-3 flex items-center gap-2.5 rounded-xl border border-hairline bg-surface-soft p-1.5 pr-3 text-left transition hover:bg-surface-strong"
+          >
+            <motion.img
+              layoutId="sticker-photo"
+              src={photoUrl}
+              alt="Foto enviada"
+              transition={PHOTO_SPRING}
+              className="h-14 w-14 shrink-0 rounded-lg object-cover"
+            />
+            <span className="text-xs font-semibold text-body">
+              Foto enviada
+              <span className="block text-[11px] font-normal text-muted">toque para ampliar</span>
+            </span>
+          </motion.button>
+        )}
       </div>
 
       {/* ---- ações ---- */}
       <div className="mt-3 flex items-center gap-2">
-        <input ref={fileRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={onPhoto} />
+        {/* Câmera (mobile abre a câmera traseira) e galeria (sem capture = seletor de arquivo) */}
+        <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={onPhoto} />
+        <input ref={galleryRef} type="file" accept="image/*" className="hidden" onChange={onPhoto} />
         <button
           type="button"
-          onClick={() => fileRef.current?.click()}
+          onClick={pickPhoto}
           disabled={anyBusy}
           className="flex items-center gap-1.5 rounded-lg border border-hairline bg-surface-soft px-3 py-2 text-sm font-semibold text-ink transition hover:bg-surface-strong disabled:opacity-50"
         >
@@ -279,6 +343,104 @@ export function AddStickersCard({ onAdded }: { onAdded?: (counts: Counts) => voi
       {recording && (
         <p className="mt-2 text-xs font-semibold text-primary">🎙️ Gravando… toque no microfone de novo para parar.</p>
       )}
+
+      {/* ---- Folha de ação: tirar foto x galeria (mobile) ---- */}
+      <AnimatePresence>
+        {sheetOpen && (
+          <>
+            <motion.div
+              className="fixed inset-0 z-[60] bg-black/50"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSheetOpen(false)}
+            />
+            <motion.div
+              className="fixed inset-x-0 bottom-0 z-[61] p-3"
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", duration: 0.4, bounce: 0.1 }}
+            >
+              <div className="mx-auto max-w-sm space-y-2">
+                <div className="overflow-hidden rounded-2xl border border-hairline bg-canvas shadow-[var(--shadow-airbnb-lg)]">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSheetOpen(false);
+                      cameraRef.current?.click();
+                    }}
+                    className="flex w-full items-center gap-3 px-5 py-4 text-left text-sm font-semibold text-ink transition hover:bg-surface-soft"
+                  >
+                    <span className="text-xl">📷</span> Tirar foto
+                  </button>
+                  <div className="border-t border-hairline" />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSheetOpen(false);
+                      galleryRef.current?.click();
+                    }}
+                    className="flex w-full items-center gap-3 px-5 py-4 text-left text-sm font-semibold text-ink transition hover:bg-surface-soft"
+                  >
+                    <span className="text-xl">🖼️</span> Escolher da galeria
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSheetOpen(false)}
+                  className="w-full rounded-2xl border border-hairline bg-canvas py-4 text-sm font-bold text-ink shadow-[var(--shadow-airbnb)] transition hover:bg-surface-soft"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* ---- Preview ampliado: lado direito (desktop) / inferior acima do menu (mobile) ---- */}
+      {photoUrl && previewOpen && (
+          <motion.div
+            key="preview"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed inset-x-3 bottom-24 z-40 sm:inset-x-auto sm:bottom-auto sm:right-4 sm:top-24 sm:w-[min(380px,30vw)]"
+          >
+            <div className="relative rounded-3xl border border-hairline bg-canvas p-3 shadow-[var(--shadow-airbnb-lg)]">
+              <div className="mb-2 flex items-center justify-between gap-2 px-1">
+                <span className="text-xs font-bold uppercase tracking-wide text-muted">
+                  {busy === "photo" ? "Lendo foto…" : "Pré-visualização"}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setPreviewOpen(false)}
+                  aria-label="Minimizar foto"
+                  title="Minimizar"
+                  className="grid h-8 w-8 place-items-center rounded-full border border-hairline bg-canvas text-muted transition hover:bg-surface-soft hover:text-ink"
+                >
+                  <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <path d="M2 2l10 10M12 2L2 12" />
+                  </svg>
+                </button>
+              </div>
+              <div className="overflow-hidden rounded-2xl bg-surface-soft">
+                <motion.img
+                  layoutId="sticker-photo"
+                  src={photoUrl}
+                  alt="Pré-visualização da foto"
+                  transition={PHOTO_SPRING}
+                  className="mx-auto max-h-[38vh] w-full object-contain sm:max-h-[68vh]"
+                />
+              </div>
+              {busy === "photo" && (
+                <div className="mt-2 flex items-center justify-center gap-2 text-xs font-semibold text-muted">
+                  <Spinner /> Identificando figurinhas…
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
     </div>
   );
 }

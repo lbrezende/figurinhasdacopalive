@@ -243,7 +243,7 @@ function StickerGrid({ grid }: { grid: GridCell[] }) {
           state === "rep"
             ? "bg-violet-500 text-white font-bold"
             : state === "have"
-            ? "border border-emerald-500/50 text-emerald-600"
+            ? "bg-emerald-500 text-white font-bold"
             : "border border-hairline text-muted-soft";
         return (
           <span
@@ -267,7 +267,7 @@ function Legend() {
         <span className="h-3 w-3 rounded bg-violet-500" /> repetida
       </span>
       <span className="flex items-center gap-1.5">
-        <span className="h-3 w-3 rounded border border-emerald-500/50" /> tem
+        <span className="h-3 w-3 rounded bg-emerald-500" /> tem
       </span>
       <span className="flex items-center gap-1.5">
         <span className="h-3 w-3 rounded border border-hairline" /> falta
