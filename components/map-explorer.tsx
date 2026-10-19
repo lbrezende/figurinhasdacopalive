@@ -5,9 +5,10 @@ import L from "leaflet";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { MapContainer, TileLayer, Marker, ZoomControl, useMap } from "react-leaflet";
-import { TRADE_POINTS, traderInitials, type TradePoint } from "@/lib/map-points";
-
-const POPULAR = [7, 9, 10, 18, 22, 27, 30, 100];
+import { TRADE_POINTS, type TradePoint } from "@/lib/map-points";
+import { pillMarkerHtml, poiMarkerHtml } from "@/components/ui/map-markers";
+import { TradePointCard } from "@/components/ui/trade-point-card";
+import { SearchOrb, StickerFilterBar } from "@/components/ui/search";
 
 function matchInfo(p: TradePoint, wanted: number[]) {
   if (!wanted.length) return { count: p.traders.length, nums: [] as number[] };
@@ -16,57 +17,12 @@ function matchInfo(p: TradePoint, wanted: number[]) {
   return { count: nums.size, nums: [...nums] };
 }
 
-// Marcadores estilo Airbnb: pílula branca com tinta; ativa em Rausch.
+// divIcons do Leaflet a partir dos builders de HTML do DS (components/ui/map-markers).
 function pillIcon(label: string, active: boolean) {
-  return L.divIcon({
-    className: "",
-    html: `<div style="transform:translate(-50%,-50%)">
-      <div style="
-        background:${active ? "#ff385c" : "#ffffff"};color:${active ? "#ffffff" : "#222222"};
-        font-weight:700;font-size:13px;padding:7px 13px;border-radius:999px;white-space:nowrap;
-        box-shadow:rgba(0,0,0,0.04) 0 2px 6px 0, rgba(0,0,0,0.16) 0 2px 8px 0;
-        border:1px solid ${active ? "#ff385c" : "#dddddd"};
-        font-family:Inter,system-ui,sans-serif;transition:all .15s;${active ? "transform:scale(1.06)" : ""}
-      ">${label}</div></div>`,
-    iconSize: [0, 0],
-    iconAnchor: [0, 0],
-  });
+  return L.divIcon({ className: "", html: pillMarkerHtml(label, active), iconSize: [0, 0], iconAnchor: [0, 0] });
 }
-
-// Uma mini-figurinha (cartão branco com cabeça/ombros) usada no leque do pino.
-function stickerCard(cx: number, cy: number, deg: number, color: string) {
-  return `<g transform="translate(${cx},${cy}) rotate(${deg})">
-    <rect x="-7.5" y="-9.5" width="15" height="19" rx="2.8" fill="#ffffff" stroke="#c4ccd6" stroke-width="0.9"/>
-    <rect x="-7.5" y="-9.5" width="15" height="19" rx="2.8" fill="${color}" opacity="0.16"/>
-    <circle cx="0" cy="-2.6" r="3.1" fill="${color}"/>
-    <rect x="-4.6" y="2.6" width="9.2" height="6" rx="3" fill="${color}"/>
-  </g>`;
-}
-
-// Ponto de interesse: pino + três figurinhas em leque + selo com a contagem.
 function poiIcon(label: string, active: boolean) {
-  const svg = `<svg width="52" height="68" viewBox="0 0 64 84" xmlns="http://www.w3.org/2000/svg">
-    <ellipse cx="32" cy="79.5" rx="10.5" ry="3.4" fill="#7cc1ff" opacity="0.9"/>
-    <path d="M32 78 C32 78 14 52 14 34 C14 22 22 13.5 32 13.5 C42 13.5 50 22 50 34 C50 52 32 78 32 78 Z"
-      fill="#ff385c" stroke="#d11a40" stroke-width="1.5"/>
-    <circle cx="32" cy="33" r="13.5" fill="#ffffff"/>
-    ${stickerCard(25.5, 32, -20, "#ffd23f")}
-    ${stickerCard(38.5, 32, 20, "#4aa3ff")}
-    ${stickerCard(32, 29.5, 0, "#22c55e")}
-  </svg>`;
-  return L.divIcon({
-    className: "",
-    html: `<div style="transform:translate(-50%,-100%)">
-      <div style="position:relative;width:52px;height:68px;transform-origin:50% 100%;transform:scale(${active ? 1.16 : 1});transition:transform .15s;${active ? "filter:drop-shadow(0 7px 11px rgba(0,0,0,.3));" : "filter:drop-shadow(0 3px 5px rgba(0,0,0,.22));"}">
-        ${svg}
-        <div style="position:absolute;top:-3px;right:-5px;min-width:20px;height:20px;padding:0 5px;
-          background:${active ? "#222222" : "#ff385c"};color:#ffffff;border:2px solid #ffffff;border-radius:999px;
-          font:800 11px Inter,system-ui,sans-serif;display:flex;align-items:center;justify-content:center;
-          box-shadow:0 1px 3px rgba(0,0,0,.3);">${label}</div>
-      </div></div>`,
-    iconSize: [0, 0],
-    iconAnchor: [0, 0],
-  });
+  return L.divIcon({ className: "", html: poiMarkerHtml(label, active), iconSize: [0, 0], iconAnchor: [0, 0] });
 }
 
 function FlyTo({ center }: { center: [number, number] | null }) {
@@ -217,41 +173,17 @@ export default function MapExplorer({ isLoggedIn = false, userName }: { isLogged
       {/* Barra superior (overlay) */}
       <div className="pointer-events-none absolute inset-x-0 top-0 z-[500] p-3 sm:p-4">
         <div className="pointer-events-auto mx-auto flex max-w-6xl items-center gap-3">
-          <form onSubmit={searchAddress} className="flex flex-1 items-center gap-2 rounded-full border border-hairline bg-canvas px-2 py-1.5 shadow-[var(--shadow-airbnb)]">
-            <span className="pl-2 text-ink">📍</span>
-            <div className="relative min-w-0 flex-1">
-              <input
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                onFocus={() => suggestions.length && setShowSuggestions(true)}
-                onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
-                placeholder="Digite seu endereço ou cidade…"
-                autoComplete="off"
-                className="w-full bg-transparent text-sm text-ink outline-none placeholder:text-muted-soft"
-              />
-              {showSuggestions && suggestions.length > 0 && (
-                <ul className="absolute left-0 right-0 top-[calc(100%+0.75rem)] z-[600] max-h-72 overflow-y-auto rounded-2xl border border-hairline bg-canvas py-1.5 shadow-[var(--shadow-airbnb-lg)]">
-                  {suggestions.map((s) => (
-                    <li key={s.placeId}>
-                      <button
-                        type="button"
-                        onMouseDown={(e) => e.preventDefault()}
-                        onClick={() => pickSuggestion(s)}
-                        className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-body transition hover:bg-surface-soft"
-                      >
-                        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-surface-soft text-muted">📍</span>
-                        <span className="truncate">{s.description}</span>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-            <button type="button" onClick={useMyLocation} className="hidden whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold text-muted hover:bg-surface-soft sm:block">
-              Perto de mim
-            </button>
-            <button type="submit" className="grid h-9 w-9 place-items-center rounded-full bg-primary text-on-primary transition hover:bg-primary-active">🔎</button>
-          </form>
+          <SearchOrb
+            value={address}
+            onChange={setAddress}
+            suggestions={suggestions}
+            showSuggestions={showSuggestions}
+            onFocus={() => suggestions.length && setShowSuggestions(true)}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+            onPick={pickSuggestion}
+            onSubmit={searchAddress}
+            onNearMe={useMyLocation}
+          />
           {/* Auth + logo topo direito — botão de login sempre visível (inclusive no mobile retrato) */}
           <div className="pointer-events-auto flex shrink-0 items-center gap-2">
             {isLoggedIn ? (
@@ -272,25 +204,14 @@ export default function MapExplorer({ isLoggedIn = false, userName }: { isLogged
 
         {/* Filtros de figurinha */}
         <div className="pointer-events-auto mx-auto mt-3 max-w-6xl">
-          <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-hairline bg-canvas p-2.5 shadow-[var(--shadow-airbnb)]">
-            <span className="px-1 text-xs font-semibold text-muted">Filtrar por figurinha:</span>
-            {POPULAR.map((n) => (
-              <button key={n} onClick={() => toggleNum(n)}
-                className={`rounded-full px-3 py-1 text-xs font-bold transition ${wanted.includes(n) ? "bg-primary text-on-primary" : "bg-surface-soft text-body hover:bg-surface-strong"}`}>
-                #{n}
-              </button>
-            ))}
-            <div className="flex items-center gap-1 rounded-full bg-surface-soft px-2 py-0.5">
-              <input value={customNum} onChange={(e) => setCustomNum(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addCustom()}
-                inputMode="numeric" placeholder="nº" className="w-12 bg-transparent text-xs text-ink outline-none placeholder:text-muted-soft" />
-              <button onClick={addCustom} className="text-xs font-bold text-primary">+</button>
-            </div>
-            {wanted.length > 0 && (
-              <button onClick={() => setWanted([])} className="ml-auto rounded-full px-3 py-1 text-xs font-semibold text-error hover:bg-surface-soft">
-                Limpar ({wanted.length})
-              </button>
-            )}
-          </div>
+          <StickerFilterBar
+            wanted={wanted}
+            onToggle={toggleNum}
+            customNum={customNum}
+            onCustomChange={setCustomNum}
+            onAddCustom={addCustom}
+            onClear={() => setWanted([])}
+          />
           {(geoMsg || wanted.length > 0) && (
             <p className="mt-2 inline-block rounded-full border border-hairline bg-canvas px-3 py-1 text-xs text-muted shadow-[var(--shadow-airbnb)]">
               {geoMsg ?? `Mostrando ${visible.length} ponto(s) com as figurinhas selecionadas`}
@@ -301,88 +222,8 @@ export default function MapExplorer({ isLoggedIn = false, userName }: { isLogged
 
       {/* Card do ponto selecionado (estilo Airbnb) */}
       {selected && (
-        <div className="absolute bottom-6 left-1/2 z-[500] w-[92%] max-w-sm -translate-x-1/2 overflow-hidden rounded-3xl border border-hairline bg-canvas shadow-[var(--shadow-airbnb-lg)]">
-          <div className="p-5">
-            {/* Cabeçalho */}
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex min-w-0 items-center gap-3">
-                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-surface-soft text-lg">📍</span>
-                <div className="min-w-0">
-                  <h3 className="truncate text-base font-semibold leading-tight text-ink">{selected.name}</h3>
-                  <p className="truncate text-xs text-muted">{selected.area}</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setSelected(null)}
-                aria-label="Fechar"
-                className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-hairline bg-canvas text-muted transition hover:bg-surface-soft hover:text-ink"
-              >
-                <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                  <path d="M2 2l10 10M12 2L2 12" />
-                </svg>
-              </button>
-            </div>
-
-            <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-surface-soft px-3 py-1 text-xs font-semibold text-body">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              {selected.traders.length} {selected.traders.length === 1 ? "colecionador" : "colecionadores"} aqui
-            </div>
-
-            <div className="mt-4 max-h-48 space-y-2.5 overflow-y-auto pr-1">
-              {selected.traders.map((tr) => (
-                <div key={tr.id} className="flex items-center gap-3">
-                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-xs font-bold text-white" style={{ background: tr.color }}>
-                    {traderInitials(tr)}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    {isLoggedIn ? (
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="truncate text-sm font-semibold text-ink">{tr.name}</span>
-                        <a
-                          href={`https://wa.me/${tr.whatsapp}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="shrink-0 rounded-full bg-[#e7f7ee] px-2.5 py-1 text-xs font-bold text-[#067647] transition hover:bg-[#d3efe0]"
-                        >
-                          WhatsApp
-                        </a>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-1.5">
-                        <span className="select-none rounded bg-surface-strong px-6 py-0.5 text-xs blur-[4px]" aria-hidden>•••• ••••</span>
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-muted-soft">
-                          <rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" />
-                        </svg>
-                      </div>
-                    )}
-                    <div className="mt-0.5 truncate text-xs text-muted">
-                      Oferece:{" "}
-                      {tr.offers.map((o, i) => (
-                        <span key={o} className={wanted.includes(o) ? "font-bold text-primary" : "text-body"}>
-                          {o}{i < tr.offers.length - 1 ? ", " : ""}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-4 border-t border-hairline pt-4">
-              {isLoggedIn ? (
-                <Link href="/app" className="block rounded-xl bg-primary py-3 text-center text-sm font-semibold text-on-primary transition hover:bg-primary-active">
-                  Abrir meu álbum e marcar troca
-                </Link>
-              ) : (
-                <>
-                  <Link href="/login?callbackUrl=/" className="block rounded-xl bg-primary py-3 text-center text-sm font-semibold text-on-primary transition hover:bg-primary-active">
-                    Entrar para ver os contatos
-                  </Link>
-                  <p className="mt-2 text-center text-xs text-muted">Grátis · nomes e WhatsApp liberam após o login</p>
-                </>
-              )}
-            </div>
-          </div>
+        <div className="absolute bottom-6 left-1/2 z-[500] w-[92%] max-w-sm -translate-x-1/2">
+          <TradePointCard point={selected} isLoggedIn={isLoggedIn} wanted={wanted} onClose={() => setSelected(null)} />
         </div>
       )}
 

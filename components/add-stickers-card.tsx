@@ -1,8 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
 import { toast } from "sonner";
+import { ActionSheet } from "@/components/ui/modal";
+import { PhotoPreview } from "@/components/ui/photo-preview";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/input";
 
 type Counts = { have: number; miss: number; rep: number; total: number; pct: number };
 type Busy = null | "add" | "voice" | "photo" | "reextract";
@@ -23,8 +26,6 @@ function mergeCodes(existing: string, add: string[]): string {
   return out.join(", ");
 }
 
-const PHOTO_SPRING = { type: "spring" as const, duration: 0.5, bounce: 0.18 };
-
 export function AddStickersCard({ onAdded }: { onAdded?: (counts: Counts) => void }) {
   const [text, setText] = useState("");
   const [transcript, setTranscript] = useState("");
@@ -37,23 +38,19 @@ export function AddStickersCard({ onAdded }: { onAdded?: (counts: Counts) => voi
   const cameraRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [isTouch, setIsTouch] = useState(false);
+  // Detecta ponteiro grosso (touch) uma vez, fora de efeito (evita setState em effect).
+  const [isTouch] = useState(() => typeof window !== "undefined" && !!window.matchMedia?.("(pointer: coarse)").matches);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
-  const photoUrlRef = useRef<string | null>(null);
-  photoUrlRef.current = photoUrl;
 
+  // Revoga a object URL anterior ao trocar de foto ou desmontar (sem ref em render).
   useEffect(() => {
-    setIsTouch(typeof window !== "undefined" && !!window.matchMedia?.("(pointer: coarse)").matches);
-    // revoga a URL temporária da foto ao desmontar
-    return () => {
-      if (photoUrlRef.current) URL.revokeObjectURL(photoUrlRef.current);
-    };
-  }, []);
+    if (!photoUrl) return;
+    return () => URL.revokeObjectURL(photoUrl);
+  }, [photoUrl]);
 
   function closePhoto() {
     setPreviewOpen(false);
-    if (photoUrl) URL.revokeObjectURL(photoUrl);
     setPhotoUrl(null);
   }
 
@@ -181,8 +178,7 @@ export function AddStickersCard({ onAdded }: { onAdded?: (counts: Counts) => voi
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
-    // Pré-visualização imediata enquanto a IA processa
-    if (photoUrl) URL.revokeObjectURL(photoUrl);
+    // Pré-visualização imediata enquanto a IA processa (a URL antiga é revogada pelo efeito)
     setPhotoUrl(URL.createObjectURL(file));
     setPreviewOpen(true);
     setBusy("photo");
@@ -236,23 +232,18 @@ export function AddStickersCard({ onAdded }: { onAdded?: (counts: Counts) => voi
               descartar
             </button>
           </div>
-          <textarea
+          <Textarea
             value={transcript}
             onChange={(e) => setTranscript(e.target.value)}
             rows={2}
             placeholder="O que você falou aparece aqui…"
-            className="mt-2 w-full resize-none rounded-lg border border-hairline bg-canvas px-3 py-2 text-sm text-ink outline-none focus:border-ink"
+            className="mt-2 rounded-lg bg-canvas"
           />
           <div className="mt-2 flex items-center justify-between gap-2">
             <p className="text-[11px] text-muted">Corrigiu algum número? Re-extraia a lista do texto.</p>
-            <button
-              type="button"
-              onClick={reextract}
-              disabled={anyBusy}
-              className="shrink-0 rounded-lg bg-surface-strong px-3 py-1.5 text-xs font-semibold text-ink transition hover:bg-ink hover:text-white disabled:opacity-50"
-            >
+            <Button variant="soft" size="sm" onClick={reextract} disabled={anyBusy} className="shrink-0 hover:bg-ink hover:text-white">
               {busy === "reextract" ? "Re-extraindo…" : "↻ Re-extrair"}
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -268,12 +259,12 @@ export function AddStickersCard({ onAdded }: { onAdded?: (counts: Counts) => voi
           )}
         </div>
         <div className="relative">
-          <textarea
+          <Textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
             rows={2}
             placeholder="ARG17, BRA10, FWC2…"
-            className="w-full resize-none rounded-xl border border-hairline bg-surface-soft px-3 py-2.5 pr-14 text-sm text-ink outline-none focus:border-ink placeholder:text-muted-soft"
+            className="px-3 py-2.5 pr-14"
           />
           <button
             type="button"
@@ -292,28 +283,15 @@ export function AddStickersCard({ onAdded }: { onAdded?: (counts: Counts) => voi
         </div>
         <p className="mt-1 text-[11px] text-muted">Edite aqui se a IA entendeu algum número errado.</p>
 
-        {/* Thumbnail minimizado da foto — aparece logo abaixo do campo */}
-        {photoUrl && !previewOpen && (
-          <motion.button
-            type="button"
-            onClick={() => setPreviewOpen(true)}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            title="Ampliar foto"
-            className="mt-3 flex items-center gap-2.5 rounded-xl border border-hairline bg-surface-soft p-1.5 pr-3 text-left transition hover:bg-surface-strong"
-          >
-            <motion.img
-              layoutId="sticker-photo"
-              src={photoUrl}
-              alt="Foto enviada"
-              transition={PHOTO_SPRING}
-              className="h-14 w-14 shrink-0 rounded-lg object-cover"
-            />
-            <span className="text-xs font-semibold text-body">
-              Foto enviada
-              <span className="block text-[11px] font-normal text-muted">toque para ampliar</span>
-            </span>
-          </motion.button>
+        {/* Pré-visualização da foto (painel ↔ thumbnail abaixo do campo) */}
+        {photoUrl && (
+          <PhotoPreview
+            src={photoUrl}
+            open={previewOpen}
+            busy={busy === "photo"}
+            onExpand={() => setPreviewOpen(true)}
+            onMinimize={() => setPreviewOpen(false)}
+          />
         )}
       </div>
 
@@ -322,22 +300,12 @@ export function AddStickersCard({ onAdded }: { onAdded?: (counts: Counts) => voi
         {/* Câmera (mobile abre a câmera traseira) e galeria (sem capture = seletor de arquivo) */}
         <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={onPhoto} />
         <input ref={galleryRef} type="file" accept="image/*" className="hidden" onChange={onPhoto} />
-        <button
-          type="button"
-          onClick={pickPhoto}
-          disabled={anyBusy}
-          className="flex items-center gap-1.5 rounded-lg border border-hairline bg-surface-soft px-3 py-2 text-sm font-semibold text-ink transition hover:bg-surface-strong disabled:opacity-50"
-        >
+        <Button variant="soft" onClick={pickPhoto} disabled={anyBusy} className="border border-hairline">
           {busy === "photo" ? "Lendo foto…" : "📷 Enviar foto"}
-        </button>
-        <button
-          type="button"
-          onClick={add}
-          disabled={anyBusy}
-          className="ml-auto rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-on-primary transition hover:bg-primary-active disabled:bg-primary-disabled"
-        >
+        </Button>
+        <Button onClick={add} disabled={anyBusy} className="ml-auto">
           {busy === "add" ? "Adicionando…" : "Adicionar ao álbum"}
-        </button>
+        </Button>
       </div>
 
       {recording && (
@@ -345,102 +313,14 @@ export function AddStickersCard({ onAdded }: { onAdded?: (counts: Counts) => voi
       )}
 
       {/* ---- Folha de ação: tirar foto x galeria (mobile) ---- */}
-      <AnimatePresence>
-        {sheetOpen && (
-          <>
-            <motion.div
-              className="fixed inset-0 z-[60] bg-black/50"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setSheetOpen(false)}
-            />
-            <motion.div
-              className="fixed inset-x-0 bottom-0 z-[61] p-3"
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              transition={{ type: "spring", duration: 0.4, bounce: 0.1 }}
-            >
-              <div className="mx-auto max-w-sm space-y-2">
-                <div className="overflow-hidden rounded-2xl border border-hairline bg-canvas shadow-[var(--shadow-airbnb-lg)]">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSheetOpen(false);
-                      cameraRef.current?.click();
-                    }}
-                    className="flex w-full items-center gap-3 px-5 py-4 text-left text-sm font-semibold text-ink transition hover:bg-surface-soft"
-                  >
-                    <span className="text-xl">📷</span> Tirar foto
-                  </button>
-                  <div className="border-t border-hairline" />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSheetOpen(false);
-                      galleryRef.current?.click();
-                    }}
-                    className="flex w-full items-center gap-3 px-5 py-4 text-left text-sm font-semibold text-ink transition hover:bg-surface-soft"
-                  >
-                    <span className="text-xl">🖼️</span> Escolher da galeria
-                  </button>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setSheetOpen(false)}
-                  className="w-full rounded-2xl border border-hairline bg-canvas py-4 text-sm font-bold text-ink shadow-[var(--shadow-airbnb)] transition hover:bg-surface-soft"
-                >
-                  Cancelar
-                </button>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-
-      {/* ---- Preview ampliado: lado direito (desktop) / inferior acima do menu (mobile) ---- */}
-      {photoUrl && previewOpen && (
-          <motion.div
-            key="preview"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="fixed inset-x-3 bottom-24 z-40 sm:inset-x-auto sm:bottom-auto sm:right-4 sm:top-24 sm:w-[min(380px,30vw)]"
-          >
-            <div className="relative rounded-3xl border border-hairline bg-canvas p-3 shadow-[var(--shadow-airbnb-lg)]">
-              <div className="mb-2 flex items-center justify-between gap-2 px-1">
-                <span className="text-xs font-bold uppercase tracking-wide text-muted">
-                  {busy === "photo" ? "Lendo foto…" : "Pré-visualização"}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setPreviewOpen(false)}
-                  aria-label="Minimizar foto"
-                  title="Minimizar"
-                  className="grid h-8 w-8 place-items-center rounded-full border border-hairline bg-canvas text-muted transition hover:bg-surface-soft hover:text-ink"
-                >
-                  <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                    <path d="M2 2l10 10M12 2L2 12" />
-                  </svg>
-                </button>
-              </div>
-              <div className="overflow-hidden rounded-2xl bg-surface-soft">
-                <motion.img
-                  layoutId="sticker-photo"
-                  src={photoUrl}
-                  alt="Pré-visualização da foto"
-                  transition={PHOTO_SPRING}
-                  className="mx-auto max-h-[38vh] w-full object-contain sm:max-h-[68vh]"
-                />
-              </div>
-              {busy === "photo" && (
-                <div className="mt-2 flex items-center justify-center gap-2 text-xs font-semibold text-muted">
-                  <Spinner /> Identificando figurinhas…
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
+      <ActionSheet
+        open={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        actions={[
+          { icon: "📷", label: "Tirar foto", onSelect: () => cameraRef.current?.click() },
+          { icon: "🖼️", label: "Escolher da galeria", onSelect: () => galleryRef.current?.click() },
+        ]}
+      />
     </div>
   );
 }
